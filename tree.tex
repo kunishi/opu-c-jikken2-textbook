@@ -1,0 +1,482 @@
+%#!platex kadai2006_04
+
+\section{二分木}
+
+% \section{実装における仕様}
+% \label{sec:Specification}
+
+% リストの概念を理解しても, 実際にプログラムとして実装する段になると細か
+% いところまで決めておく必要がある.
+% リストの実装の仕様として様々なものが考えられるが, 本実験では以下に示す
+% 仕様を採用することにする.
+% また, 内容に変更があるなしに関わらず, 仕様は必ずレポートに記述すること.
+
+
+% \begin{itemize}
+% \item セルデータは \texttt{int} 型のデータ 1 個だけである.
+% \item 次のセルが存在しない場合には, 次のセルへのポインタを
+%   \texttt{NULL} とする.
+%   すなわち, 次のセルとして \texttt{NULL} を保持するセルは, リストの終
+%   端となる.
+% \item セルの挿入は, 場所の指定に使用したセルとその直前のセルの間に挿入
+%   する.
+% \item リストの先頭として, ダミーのセルを用いる.
+%   すなわち, ダミーセルの次のセルがリストの先頭のセルとなる.
+% \item セルの新規作成には \texttt{malloc} を使用し, 削除時には
+%   \texttt{free} を使用してメモリを動的に確保/解放する.
+% \item 操作関数は, リストの新規作成 (MAKENULL), 次のセル/前のセルへのポ
+%   インタの取得 (NEXT/PREVIOUS), リストの先頭のセル/終端のセルへのポイ
+%   ンタの取得 (FIRST/END), セルの新規挿入 (INSERT), セルの削除
+%   (DELETE), セル位置の取得 (LOCATE), セルデータの取得 (RETRIVE), リス
+%   ト内容の表示 (PRINTLIST) にリスト全体の削除を加えた計 11 関数から構
+%   成する.
+% \end{itemize}
+
+次回の実験で利用しやすいように、構造体宣言、関数のプロトタイプ宣言等は
+ヘッダファイルに、操作関数群と操作プログラムは別ファイルとし、コンパイ
+ルには \texttt{make} を用いるようにすること。
+
+\begin{exercise}
+  二分木の節点を表す構造体 \texttt{struct node} を作成せよ。
+  なお、保持するデータは \texttt{int} 型のデータ 1 つのみとする。
+\end{exercise}
+
+%% \begin{screen}
+%%   \noindent\textbf{【解答例 1】}
+%% \begin{verbatim}
+%% struct node {
+%%   struct node *left;  /* pointer to left child */
+%%   struct node *right;  /* pointer to right child */
+%%   int data;  /* data */
+%% };
+%% \end{verbatim}
+%% \end{screen}
+
+\begin{exercise}
+  引数として、格納データおよび左の子へのポインタ、右の子へのポインタを
+  この順にとり、その内容の節点を新規に作成してそのポインタを返す関数
+ \begin{quote}
+  \texttt{struct node *createNode(int, struct node*, struct node*);}
+ \end{quote}
+  を作成せよ。
+  一方あるいは双方の子が存在しない節点を作成する場合には、子として
+  \texttt{NULL} を指定することとする。
+  また、節点の格納領域は \texttt{malloc} を用いて動的に確保すること。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 2】}
+%   \small
+% \begin{verbatim}
+% struct node *createNode(int data, struct node *left, struct node *right)
+% {
+%   struct node *node;  /* new node */
+
+
+%   /* allocate memory for new node */
+%   node = (struct node*)malloc(sizeof(struct node));
+%   if (node == (struct node*)NULL) {
+%     fprintf(stderr, "createNode: can not allocate memory for new node.\n");
+%     exit(1);
+%   }
+
+%   /* set contents */
+%   node->left = left;
+%   node->right = right;
+%   node->data = data;
+
+%   /* return pointer to the new node */
+%   return node;
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポイントをとり、その節点の左の子/右の子の節点への
+  ポインタを返す関数
+ \begin{quote}
+  \texttt{struct node *leftNode(struct node*);} \\
+  \texttt{struct node *rightNode(struct node*);}
+ \end{quote}
+   を作成せよ。
+  なお、該当する子が存在しない場合には \texttt{NULL} を返すこと。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 3-1】}
+%   \small
+% \begin{verbatim}
+% struct node *leftNode(struct node *node)
+% {
+%   struct node *left = (struct node*)NULL;  /* pointer to left node (default NULL) */
+
+
+%   if (node != (struct node*)NULL) {
+%     left = node->left;
+%   }
+
+%   return left;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 3-2】}
+%   \small
+% \begin{verbatim}
+% struct node *rightNode(struct node *rode)
+% {
+%   struct node *right = (struct node*)NULL;  /* pointer to right node (default NULL) */
+
+
+%   if (node != (struct node*)NULL) {
+%     right = node->right;
+%   }
+
+%   return right;
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポインタをとり、その節点が保持しているデータを返す
+  関数
+ \begin{quote}
+  \texttt{int labelNode(struct node*);}
+ \end{quote}
+  を作成せよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 4】}
+%   \small
+% \begin{verbatim}
+% int labelNode(struct node *node)
+% {
+%   int data = 0;  /* label of the node (default 0) */
+
+
+%   if (node != (struct node*)NULL) {
+%     data = node->data;
+%   }
+
+%   return data;
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポインタをとり、その節点を根とする二分木を深さ優先
+  でたどり、各節点が保持しているデータを\underline{行きがけ順に}表示す
+  る再帰関数
+\begin{quote}
+ \texttt{void preOrder(struct node*);}
+\end{quote}
+  を作成せよ。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 5】}
+%   \small
+% \begin{verbatim}
+% void preOrder(struct node *tree)
+% {
+%   if (tree != (struct node*)NULL) {
+%     printf("%d, ", tree->data);
+
+%     if (tree->left != (struct node*)NULL) {
+%       preOrder(tree->left);
+%     }
+
+%     if (tree->right != (struct node*)NULL) {
+%       preOrder(tree->right);
+%     }
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポインタをとり、その節点を根とする二分木を深さ優先
+  でたどり、各節点が保持しているデータを \underline{通りがけ順に} 表示
+  する再帰関数
+\begin{quote}
+ \texttt{void inOrder(struct node*);}
+\end{quote}
+  を作成せよ。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 6】}
+%   \small
+% \begin{verbatim}
+% void inOrder(struct node *tree)
+% {
+%   if (tree != (struct node*)NULL) {
+%     if(tree->left != (struct node*)NULL) {
+%       inOrder(tree->left);
+%     }
+
+%     printf("%d, ", tree->data);
+
+%     if(tree->right != (struct node*)NULL) {
+%       inOrder(tree->right);
+%     }
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポインタをとり、その節点を根とする二分木を深さ優先
+  でたどり、各節点が保持しているデータを \underline{帰りがけ順に} 表示
+  する再帰関数
+\begin{quote}
+ \texttt{void postOrder(struct node*);}
+\end{quote}
+  を作成せよ。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 7】}
+%   \small
+% \begin{verbatim}
+% void postOrder(struct node *tree)
+% {
+%   if (tree != (struct node*)NULL) {
+%     if(tree->left != (struct node*)NULL) {
+%       postOrder(tree->left);
+%     }
+
+%     if(tree->right != (struct node*)NULL) {
+%       postOrder(tree->right);
+%     }
+
+%     printf("%d, ", tree->data);
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポインタをとり、その節点を根とする二分木（部分木）
+  の高さを返す再帰関数
+\begin{quote}
+ \texttt{int heightTree(struct node*);}
+\end{quote}
+  を作成せよ。
+
+\end{exercise}
+
+\begin{screen}
+   \textbf{参考)}
+  二分木の高さは、左右それぞれの子を根とする二分木（部分木）のうち高い
+  方の高さ ${} + 1$ で求めることができる。
+
+  {\footnotesize
+    \texttt{heigthTree(node) = MAX( heigthTree(node の左の子),
+      heigthTree(node の右の子)) + 1;}}
+
+\begin{center}
+  \includegraphics[height=60.0mm]{tree.eps}
+\end{center}
+\end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 8】}
+%   \small
+% \begin{verbatim}
+% int heigthTree(struct node *tree)
+% {
+%   int heigth = 0;
+%   int leftHeigth = 0;
+%   int rightHeigth = 0;
+
+
+%   if (tree != (struct node*)NULL) {
+%     if (tree->left != (struct node*)NULL) {
+%       leftHeigth = heigthTree(tree->left);
+%     }
+
+%     if (tree->right != (struct node*)NULL) {
+%       rightHeigth = heigthTree(tree->right);
+%     }
+
+%     if (leftHeigth > rightHeigth) {
+%       heigth = leftHeigth + 1;
+%     } else {
+%       heigth = lightHeigth + 1;
+%     }
+%   }
+
+%   return heigth;
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数としてあるデータと節点へのポインタをとり、その節点を根とする二分
+  木（部分木）中に存在する、そのデータと同じ値をもつ節点へのポインタを
+  返す再帰関数
+\begin{quote}
+ \texttt{struct node *locateNode(int, struct node*);}
+\end{quote}
+  を
+  作成せよ。
+  ただし、該当する節点がない場合には \texttt{NULL} を返すこと。
+  なお、該当する節点が複数存在する場合であっても最初に見つかったものの
+  みを返せばよい。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 9】}
+%   \small
+% \begin{verbatim}
+% struct node *locateNode(int data, struct node *tree)
+% {
+%   struct node *node;  /* pointer to the node */
+
+
+%   if (tree == (struct node*)NULL) {
+%     return (struct node*)NULL;
+%   }
+
+%   if (tree->data == data) {
+%     return tree;
+%   }
+
+%   if (tree->left != (struct node*)NULL) {
+%     node = locateNode(data, tree->left);
+%     if (node != (struct node*)NULL) {
+%       return node;
+%     }
+%   }
+
+%   if (tree->right != (struct node*)NULL) {
+%     node = locateNode(data, tree->right);
+%     if (node != (struct node*)NULL) {
+%       return node;
+%     }
+%   }
+
+%   return (struct node*)NULL;
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として節点へのポインタをとり、その節点を根とする二分木（部分木）
+  を削除する再帰関数
+\begin{quote}
+ \texttt{void deleteTree(struct node*);}
+\end{quote}
+  を作成せ
+  よ。
+
+  \textbf{参考)}
+  二分木の削除は、その二分木を構成する全ての節点を再帰的に削除すること
+  で実現できるが、削除する順番に注意すること。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 10】}
+% \begin{verbatim}
+% void deleteTree(struct node *tree)
+% {
+%   if (tree != (struct node*)NULL) {
+%     /* delete left sub-tree */
+%     if (tree->left != (struct node*)NULL) {
+%       deleteTree(tree->left);
+%     }
+
+%     /* delete right sub-tree */
+%     if (tree->right != (struct node*)NULL) {
+%       deleteTree(tree->right);
+%     }
+
+%     /* delete corrent node */
+%     free(tree);
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+ 実装した二分木の操作関数が正しく動作するか確かめるように\texttt{main()}
+ 関数を作成し、正しく動作していることを確かめよ。
+\end{exercise}
+
+% \section*{二分木操作プログラム例}
+% \label{ExampleMain}
+
+% \begin{screen}
+%   \noindent\textbf{【プログラム例】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(void)
+% {
+%   struct node *tree;
+%   struct node *tree1, *tree2, *tree3;
+%   struct node *node1, *node2, *node3, *node4;
+
+
+%   node1 = createNode(1, (struct node*)NULL, (struct node*)NULL);
+%   node2 = createNode(2, (struct node*)NULL, (struct node*)NULL);
+%   tree1 = createNode(3, node1, node2);
+
+%   node3 = createNode(5, (struct node*)NULL, (struct node*)NULL);
+%   node4 = createNode(6, (struct node*)NULL, (struct node*)NULL);
+%   tree2 = createNode(7, node4, node3);
+
+%   tree3 = createNode(8, (struct node*)NULL, tree2);
+
+%   tree = createNode(4, tree1, tree3);
+
+%   printf("postOrder(tree): ");
+%   postOrder(tree);
+%   printf("\ninOrder(tree):   ");
+%   inOrder(tree);
+%   printf("\npreOrder(tree):  ");
+%   preOrder(tree);
+%   putc('\n', stdout);
+
+%   printf("labelNode(leftNode(tree))  = %d\n", labelNode(leftNode(tree)));
+%   printf("labelNode(rightNode(tree)) = %d\n", labelNode(rightNode(tree)));
+
+%   printf("heigthTree(tree) = %d\n", heigthTree(tree));
+%   printf("labelNode(locateNode(2,tree)) = %d\n", labelNode(locateNode(2, tree)));
+
+%   deleteTree(tree);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【実行例】}
+%   \scriptsize
+% \begin{verbatim}
+% postOrder(): 1, 2, 3, 6, 5, 7, 8, 4, 
+% inOrder():   1, 3, 2, 4, 8, 6, 7, 5, 
+% preOrder():  4, 3, 1, 2, 8, 7, 6, 5, 
+% leftNode  = 3
+% rightNode = 8
+% heigthTree = 4
+% labelNode(locateNode(2)) = 2
+% \end{verbatim}
+% \end{screen}
+
+% \begin{center}
+% \end{center}

@@ -1,0 +1,947 @@
+%#!platex
+
+\documentclass[a4j,10pt]{jsbook}
+\usepackage{ascmac}
+\usepackage[dvipdfm]{graphicx}
+\usepackage{listings}
+\usepackage{mediabb}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\DeclareMathOperator{\op}{op}
+
+\title{情報通信工学実験IBテキスト}
+\author{国島丈生}
+\date{}
+
+\newtheorem{exercise}{課題}[chapter]
+\newtheorem{example}{例題}[chapter]
+
+\setlength{\textwidth}{\fullwidth}
+\setlength{\evensidemargin}{\oddsidemargin}
+
+\begin{document}
+\lstset{language=C,frame=single}
+\maketitle
+
+\chapter{構造体}
+
+\section{構造体とは}
+
+\emph{構造体}(structure)とは、複数の変数をひとまとまりにしたものである。
+構造体を構成する変数のことを\emph{メンバー}(member)という。1つの構造体に
+同じ名前のメンバーを含めることはできない。
+
+例えば、平面座標上の点を表す構造体の宣言は次のようになる。
+\begin{lstlisting}
+ struct point {
+    int x;
+    int y;
+ };
+\end{lstlisting}
+メンバーを宣言する順番に制限はない。この例で、変数\texttt{y}を\texttt{x}
+より先に宣言しても、プログラム上での扱いは変わらない。
+
+メンバーの型には制限はない。つまり、いろいろな型のメンバーが1つの構造体に
+含まれていてもよい。後述するように、ポインタ型の変数をメンバーにしてもよ
+い。
+
+tgifなどのドローソフトには、いくつかの図形をグループ化する機能がある。グ
+ループ化された図形たちは、あたかも1つの図形であるかのように拡大縮小したり、
+コピー\&ペーストしたりすることができる。構造体は、この「グループ化」の機
+能に近い。
+
+\begin{exercise}
+ 個人データを表す構造体を作成せよ。個人データの項目は配布された課題にある
+ 通りとする。
+\end{exercise}
+
+\section{型としての構造体}
+
+いったん構造体を定義すると、以降、その構造体は型として扱える。つまり
+\texttt{int}や\texttt{char}などと同じように扱うことができる。例えば、先の
+構造体\texttt{point}を宣言すると、次のように、\texttt{struct point}型の変数を宣
+言したり利用したりできる。
+
+\begin{lstlisting}
+ /* struct point 型の変数 pt の宣言 */
+ struct point pt;
+
+ /* struct point 型の変数 maxpt の宣言、および初期化。
+    point の宣言に従って、値とメンバーが対応される。
+    この例では、x と 320 が、 y と 200 がそれぞれ対応される。
+  */
+ struct point maxpt = {320, 200};
+
+ /* 構造体の宣言と変数宣言を一緒にしてもよい */
+ struct float_point {
+   float x;
+   float y;
+ } float_pt;
+\end{lstlisting}
+
+構造体と変数の関係を述べる前に、変数と型の正体について述べておく必要があ
+るだろう。
+
+変数 (variable) とはいわば「入れ物」であり、メモリ上に確保された一定サイ
+ズの領域である。その中に入れる(格納する)ことのできる値 (value) の制限が
+\emph{型} (type)である\footnote{型は、数学で言うところの定義域
+(domain)と似た概念である。}。例えば \texttt{int i;} と宣言すると、(多く
+の場合)32ビッ
+ト分のメモリ領域が自動的に確保され\footnote{正確には、コンパイル時に、32
+ビットのメモリ領域がプログラム中に確保される。詳しくは講義「コンパイラ」
+で扱う。}、そこに\texttt{i}という名前がつけられる。これが変数\texttt{i}の
+正体である。そして、変数\texttt{i}には\texttt{int}型の値、すなわち整数し
+か格納できない。
+
+では、構造体はどのようなものとしてメモリ上に配置されているのだろうか。実
+は、メンバーの領域が連続して配置されたようなメモリ領域になっている。ただ
+し、構造体独自の領域がある場合もある。
+
+例えば、変数\texttt{pt}は図\ref{180353_4Oct05}のようにメモリ上に配置され
+る。\texttt{struct point}型の変数\texttt{pt}を宣言すると、\texttt{struct
+point}型に相当
+するメモリ領域(この場合は32ビット+32ビット=64ビット)が自動的に確保され、
+そこに\texttt{pt}という名前がつけられる。そしてこの領域には、
+\texttt{struct point}型の値しか格納できない。\texttt{struct point}型の値とは、具体的に
+は2つの整数の組であり、例えば$(320, 200)$のようなものである。
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=10cm]{point.eps}
+ \end{center}
+ \caption{構造体\texttt{point}のメモリ上の配置}
+ \label{180353_4Oct05}
+\end{figure}
+
+\section{メンバーの値を参照するには}
+
+構造体のメンバーの値を参照するにはどうしたらよいのだろうか。例えば、平面
+上の点のx座標の値を得るにはどうしたらよいのだろうか。
+
+それには\emph{構造体メンバー演算子} (structure member operator)
+``\,\texttt{.}\,'' を用いる。これは二項演算子であり、各演算数は次の通りで
+なければならない。
+\begin{itemize}
+ \item 第1演算数は構造体型の変数や式\footnote{ただし \texttt{\{320,
+       200\}.x} というような記法は許されない。}
+ \item 第2演算数はメンバー名
+\end{itemize}
+
+\begin{lstlisting}
+ struct point maxpt = {320, 200};
+
+ /* メンバー x の値の参照 */
+ printf("%d\n", maxpt.x);
+
+ /* メンバー y への代入 */
+ maxpt.y = 240;
+\end{lstlisting}
+
+\section{構造体の配列}
+
+構造体は型として扱えるのだから、もちろん構造体の配列も許される。
+
+\begin{lstlisting}
+ struct point pts[100];
+
+ /* 要素数 3 の配列 pts1 の宣言と初期化 */
+ struct point pts1[] = 
+   {{320, 200},
+    {150, 500},
+    {0, 0}};
+
+ /* pts1 の各要素は struct point 型の値 */
+ pts1[1].y = 240;
+\end{lstlisting}
+
+\section{構造体へのポインタ参照}
+
+\subsection{ポインタについてのまとめ直し}
+
+構造体は型として扱えるのだから、もちろん構造体へのポインタ参照も許される。
+この話に入る前に、ポインタについて簡単にまとめ直しておく。
+
+先に述べたように、変数の正体はメモリ領域である。ということは、変数と、(変
+数の正体である)メモリ領域の先頭番地は1対1に対応するはずである\footnote{メ
+モリ領域の末尾番地も扱わないと不公平じゃないか、というように考える人がい
+るかもしれないが、末尾番地は「先頭番地+変数の型の大きさ」で計算できる、と
+いうことでお許しいただこう。}。
+
+そこで、Cでは以下の2つの単項演算子を用意した。
+\begin{itemize}
+ \item \emph{アドレス演算子} (address operator) \texttt{\&}：変数名からメ
+       モリ領域の先頭番地を得る演算子
+ \item \emph{間接演算子} (indirection operator) \texttt{*}：メモリ領域の
+       先頭番地から変数の値を得る演算子\footnote{ただし、Cコンパイラは、
+       本当に「先頭」かどうかの保証はしてくれない。プログラマが責任を持っ
+       て、必ず「先頭」であるようにプログラムを書かなければならない。皆さ
+       んご承知の通り、これを間違えると、segmentation fault や bus error
+       を引き起こす。}
+\end{itemize}
+
+また、型\texttt{X}に対して、\texttt{X}型のメモリ領域の先頭番地を表す型
+\texttt{X*}を用意した。例えば \texttt{int *pi;} と書くと、変数
+\texttt{pi}には\texttt{int}型のメモリ領域の先頭番地しか格納できない
+\footnote{ただし、実はCでは「先頭番地」でなくても格納できてしまう。これも
+segmentation fault や bus error の原因となる。}(図\ref{195519_4Oct05})。
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=10cm]{reference_type.eps}
+ \end{center}
+ \caption{\texttt{int *pi;}}
+ \label{195519_4Oct05}
+\end{figure}
+
+\subsection{構造体に対するポインタ}
+
+前節のポインタに関する説明は、構造体にもそのままあてはまる。以下の2つの変
+数宣言はまったく異なることに注意せよ。
+\begin{itemize}
+ \item \verb|struct point pt;| … 変数\texttt{pt}は\texttt{struct point}型の値を
+       格納できるだけの領域(64ビット)を持つ。格納できる値は$(320, 200)$の
+       ような2つの整数の組である。
+ \item \verb|struct point *p;| … 変数\texttt{p}は番地を格納できる領域(現
+       在は多くの場合32ビット)を持つ。格納できる値は\texttt{struct point}型の値
+       の格納領域の\emph{先頭番地}である。
+\end{itemize}
+
+これまで呪文のように書いてきた以下のプログラムコードも、これまでの説明を
+踏まえると、体系的に理解することができる。
+
+\begin{itemize}
+ \item \verb|struct point *p = (struct point *)NULL;|
+
+       Cでは、\texttt{NULL}は整数\texttt{0}の別名である。すると、このコー
+       ドの意味は「番地を格納する32ビットのメモリ領域\texttt{p}を確保し、
+       そこに\texttt{0}を代入する」となる。ただし、\texttt{0}は通常
+       \texttt{int}型であり、変数\texttt{p}の型とは異なる。そこで、
+       \verb|(struct point *)NULL|というように、明示的に\texttt{0}の型を
+       変換(キャスト, cast)してから代入を行っている。
+ \item \verb|struct point *p = (struct point *)malloc(sizeof(struct point));|
+
+       変数\texttt{p}の領域を確保するところまでは上の例と同じ。
+
+       \texttt{malloc()}関数は次のような動きをする。
+       \begin{itemize}
+	\item プログラム実行時\footnote{ヒープ領域と呼ばれる特別な場所に
+	      確保する。詳細は「コンパイラ」の講義で述べる。}に、(引数で
+	      与えられた整数値)バイトの領域を確保
+	\item 確保した領域の先頭番地を、\texttt{void *}型の値として返す
+	\item 確保した領域の初期値は未定義(何が入っているか分からない)
+       \end{itemize}
+       \texttt{sizeof}は(なんと!)単項演算子で、しかも型名を演算数にとる。
+       結果は、その型の値を格納するのに必要なバイト数である。したがって
+       \texttt{sizeof(struct point) = 8}(8バイト=64ビット)である。
+
+       まとめると、\texttt{malloc()}により\texttt{sizeof(struct point)}バ
+       イトの領域を動的に確保し、その先頭番地を明示的に\texttt{struct
+       point *}型に変換してから\texttt{p}に代入していることになる(図
+       \ref{154317_6Oct05})。ただし\texttt{malloc()}で確保した領域の初期
+       値は分からないので、プログラマが自分で初期化しておかなければならな
+       い。
+\end{itemize}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=10cm]{malloc.eps}
+ \end{center}
+ \caption{領域の動的確保}
+ \label{154317_6Oct05}
+\end{figure}
+
+\subsection{ポインタ参照した構造体のメンバー}
+
+図\ref{154317_6Oct05}において、動的に確保した構造体のメンバー\texttt{x}の
+値を読み出すにはどうしたらよいだろうか。
+
+8236番地から始まる構造体は、\texttt{*p}で得られる。したがって、この構造体
+のメンバー\texttt{x}は\texttt{(*p).x}で得られる。ただし、二項演算子
+\,\texttt{.}\, は単項演算子\texttt{*}よりも優先順位が高いので、カッコが必
+要になる。
+
+Cのプログラムでは、この種のコードが頻繁に出てくるので、カッコが多くなると
+煩わしい\footnote{Lispのように…}。そこで、Cには、\texttt{(*p).x}の略記法
+が用意してある。\texttt{p -> x}である。この2つの式はまったく等価である。
+
+なお、演算子\texttt{->}は左結合であることに注意されたい。すなわち、
+\texttt{a -> b -> c}は\texttt{(a -> b) -> c}の意味になる。
+
+\section{ポインタ型を含む構造体}
+
+ここまでの説明で述べた通り、ポインタ変数とは単に「番地(という整数値)しか
+格納できない変数」である。したがって、ポインタ変数をメンバーとするような
+構造体も許されるはずである。例として、次のような構造体を考える。
+
+\begin{lstlisting}
+ struct point2 {
+   int x;
+   int y;
+   struct point2 *next;
+ };
+
+ struct point2 *pp;
+\end{lstlisting}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=6cm]{point2.eps}
+ \end{center}
+ \caption{\texttt{point2}型の構造体}
+ \label{161708_6Oct05}
+\end{figure}
+
+これは図\ref{161708_6Oct05}のような構造体を表している。メンバー
+\texttt{next}が、別の\texttt{struct point2}型の構造体を指し示すポインタになって
+いる。左側の構造体の先頭番地が変数\texttt{pp}に格納されているとすると、右
+側の構造体の先頭番地は\texttt{p -> next}である。したがって、右側の構造体
+のメンバー\texttt{x}の値を得るには\texttt{(pp -> next) -> x}、もしくは
+\texttt{pp -> next -> x}とすればよい\footnote{\texttt{->}は左結合の演算子
+であることに注意。}。
+
+\input{structure}
+
+\section{課題：まとめ}
+
+\begin{exercise}
+ 今回実装したプログラムについて、改良する点があるとすればどのようなこと
+ が考えられるか。また、その改良を実装する場合の実装方針、問題点、難しい
+ と思われる点などについて考察せよ。
+\end{exercise}
+
+\chapter{リスト}
+
+\section{リストの数学的定義}
+
+数学的には、「ある同一の型の要素を0個以上並べたもの」を\emph{リスト}とい
+う\footnote{「同一の型」であるかどうかは定義による。この講義ではこの定義
+にしたがうものとする。}。記法は文献によってまちまちであるが、この実験では
+$[a_1, a_2, \cdots, a_n]$というように、要素をコンマで区切り、角括弧で囲っ
+て書くことにする\footnote{この記法は「計算機言語I」で扱うMLにならってい
+る。}。このとき、リストに含まれる要素数をリストの長さという。また、要素が
+一つもないリストを\emph{空リスト}といい、$[]$と書く\footnote{LispやMLのよ
+うな関数型言語では``nil''と書くことも多い。}。
+
+リストの要素は、リスト内の位置によって全順序(total order)の関係をつける
+ことができる。つまり、リスト内の任意の2要素を取ってくると、それらの間に
+リスト内の位置による順序関係を決めることができる。なお、ここでいう順序関
+係は、要素間の大小とは関係ないことに注意すること。たとえば、整数型の要素
+からなるリスト$[1,3,2]$を考えると、要素間に次のような順序関係をつけるこ
+とができる。
+\begin{itemize}
+ \item リスト内の位置による順序: 1(第1要素), 3(第2要素), 2(第3要素)
+ \item 要素の大小による順序: 1(第1要素), 2(第3要素), 3(第2要素)
+\end{itemize}
+
+\section{リスト内の基本操作}
+
+リストに限らず、この実験で扱うような論理的なデータ構造では、それに対する
+基本的な操作群を考えることができる。これをうまく定めれば、そのデータ構
+造に対するあらゆる操作は、操作群中の操作のみを用いて構成することができる。
+
+リストに対する基本操作群の一例として、図\ref{fig:listBasis}のようなもの
+を考えることができる。
+\begin{figure}[htbp]
+\begin{screen}
+  \begin{description}
+ \item[$FIRST(L)$] リスト$L$の先頭の要素の位置を返す。
+ \item[$END(L)$] リスト$L$の末尾の要素の位置を返す。
+ \item[$INSERT(x, p, L)$] 要素$x$をリスト$L$の位置$p$に挿入する。結果と
+ して、$L$の$p$番目以降の要素はすべて1つずつ後ろに移動することになる。リ
+ スト$L$に位置$p$がない場合は、結果は定義されない。
+ \item[$LOCATE(x, L)$] リスト$L$内の要素で、$x$と同じ値を持つものの位置
+ を返す。該当する要素が2つ以上ある場合は該当する最初の要素の位置を返す。
+ また該当する要素がないときの結果は定義されない。
+ \item[$RETRIEVE(p, L)$] 位置$p$にあるリスト$L$の要素を返す。$L$に位置
+ $p$がない場合の結果は定義されない。
+ \item[$DELETE(p, L)$] 位置$p$にあるリスト$L$の要素を削除する。$L$に位置
+ $p$がない場合の結果は定義されない。
+ \item[$NEXT(p, L), PREVIEOUS(p, L)$] 位置$p$にあるリスト$L$の要素の一つ
+ 次の要素の位置、一つ前の要素の位置をそれぞれ返す。$NEXT(END(L), L)$や
+ $PREVIOUS(FIRST(L), L)$の値は定義されない。また$L$に位置$p$がない場合は
+ $NEXT$, $PREVIOUS$ともに結果は定義されない。
+ \item[$MAKENULL()$] 空リストを返す。
+ \item[$PRINTLIST(L)$] リスト$L$の要素を順にすべて印字する。
+ \end{description}
+\end{screen}
+ \caption{リストの基本操作群}
+ \label{fig:listBasis}
+\end{figure}
+なお、このような基本操作群の定め方は一通りとは限らない。たとえばプログラ
+ミング言語MLでは、図\ref{fig:listBasisInML}のようなものを基本操作群とし
+ている。
+\begin{figure}[htbp]
+\begin{screen}
+ \begin{description}
+ \item[$nil$] 空リスト。
+ \item[$cons(x, L)$] リスト$L$の先頭に要素$x$を加えたリストを返す。
+ \item[$hd(L)$] リスト$L$の先頭の要素を返す。
+ \item[$tl(L)$] リスト$L$から先頭の要素を取り除いたリストを返す。
+ \item[$L@M$] リスト$L$の後ろにリスト$M$を連接したリストを返す。
+ \end{description}
+\end{screen}
+ \caption{MLにおけるリストの基本操作群}
+ \label{fig:listBasisInML}
+\end{figure}
+
+\section{リストの実装}
+
+これまで述べてきたリストをプログラミング言語で実装する方法はいくつかある。
+この章では、実装方法のうちのいくつかについて概略を述べる。
+
+プログラミング言語の中には、リストをライブラリとしてすでに持っているもの
+もある。Lisp, ML, Prolog, Javaなどはその例である。一方Cはリストをライブ
+ラリとして持っていないので、リストを使いたい場合は自分で実装を行う必要が
+ある。
+
+\subsection{配列による実装}
+
+もっとも簡単な実装は配列を用いたものである。図\ref{fig:arrayList}のよう
+に、配列内の連続したセルの中にリストの要素を順に格納する。
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics{arraylist.eps}
+  \caption{配列によるリストの実装}
+  \label{fig:arrayList}
+ \end{center}
+\end{figure}
+
+この方法は実装が容易であり、また、リストの各要素を調べたり最後に新しい要
+素を尽け加える操作は簡単に実装できる。しかし、配列の大きさを越える長さの
+リストは扱うことができない。また、リストの途中に要素を挿入する場合、それ
+以降の要素をすべて1つずつずらして、新しく挿入する要素のための領域を確保
+しなければならない。同様に、途中の要素を削除する場合も、後ろの要素を前に
+詰めて、すきまを埋める必要がある。
+
+\subsection{構造体によるリストの実装(1)}
+
+構造体を用いてリストを実装することもできる。この場合、各要素を表すデー
+タ構造と、次の要素へのポインタとを構造体(\emph{セル})として構成し、リ
+ストの出現順につないでいくことになる。図\ref{fig:linklist}に実装例を示
+す。この実装のことを連結リストということがある。なお、この図のように、
+連結リストの先頭に特別なセル$header$を設けておくと都合のよいことが多い。
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics{linklist.eps}
+  \end{center}
+  \caption{構造体によるリストの実装}
+  \label{fig:linklist}
+\end{figure}
+
+この方法では、リストの要素の増減に合わせて記憶領域を動的に確保することが
+でき、リストの長さに制限がない。また、リストを格納するために連続した記憶
+領域を使わなくてよいので、要素の挿入や削除の実装が簡単になる。そのかわり、
+ポインタのための領域を余分に使用する、要素の検索は先頭の要素から順にポイ
+ンタをたどっていく必要がある、などの欠点がある。
+
+今回の実験では、この方式による実装を行う。
+
+\subsection{構造体によるリストの実装(2)}
+
+LispやMLなどのプログラミング言語では、$[[1,2,3], [4,5], nil]$のようにリ
+ストを入れ子にすることができる。このようなリストを許す場合には、ここまで
+に述べたものとは違う実装が必要になる。MLにおけるリストの実装を図
+\ref{fig:linkedlist2}に示す。
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics{LinkedList.eps}
+ \end{center}
+ \caption{構造体によるリストの実装(2)}
+ \label{fig:linkedlist2}
+\end{figure}
+
+基本的には構造体を使うが、各要素へのポインタと、次の要素へのポインタとを
+セルとして構成するところが前節の実装と大きく異なる点である\footnote{この
+実装については、「計算機言語I」で詳しく述べる予定である。}。
+
+\input{list}
+
+\section{課題：まとめ}
+
+\begin{exercise}
+ 今回実装したプログラムについて、改良する点があるとすればどのようなこと
+ が考えられるか。また、その改良を実装する場合の実装方針、問題点、難しい
+ と思われる点などについて考察せよ。
+\end{exercise}
+
+\chapter{スタック、キュー}
+
+リストの特殊な場合として重要なものに、スタックとキュー(待ち行列)がある。
+これらはリストとは独立した概念として計算機科学の分野で登場することも多い。
+
+\section{スタック}
+\subsection{定義と基本操作群}
+
+リストの中で、挿入や削除がいつも一方の端からしかできないものを\emph{スタッ
+ク}という\footnote{本を机の上に積んだ状態をイメージしてもらうとよい。}。
+追加や削除をする側の端をスタックの\emph{先頭}、もう一方の端をスタックの
+\emph{底}という。スタックでは、あとで追加した要素のほうが先に取り出され
+るという性質があり、このことからスタックをLIFO(Last-In First-Out)と呼ぶ
+こともある。
+
+スタックでは追加や削除が一方の端からしかできない。また、先頭以外のスタッ
+ク中の要素を参照することもできない。したがって、スタックの基本操作群はリ
+ストよりも簡単になる。一例を図\ref{fig:stackBasis}に示す。
+\begin{figure}[htbp]
+\begin{screen}
+  \begin{description}
+  \item[$MAKENULL(S)$] スタック$S$を空にする。
+  \item[$TOP(S)$] スタック$S$の先頭要素を返す。返した要素はスタックから
+             降ろさない。
+  \item[$POP(S)$] スタック$S$の先頭要素をスタックから降ろし(削除)、降ろ
+             した要素の値を返す\footnote{実装によっては、スタックから降
+             ろした要素を返り値として返さないこともある。}。
+  \item[$PUSH(x, S)$] 要素$x$をスタック$S$の先頭に積む(追加)。
+  \item[$EMPTY(S)$] スタック$S$が空のとき真、そうでないとき偽を返す。
+ \end{description}
+\end{screen} 
+\caption{スタックの基本操作群}
+ \label{fig:stackBasis}
+\end{figure}
+
+\subsection{リストによる実装}
+
+リストの基本操作群を用いてスタックの基本操作群を実装することを考える。こ
+のとき、スタックの先頭をリストのどちら側の端にするかを決めておかなければ
+ならない。リストによる実装の場合は、実装のしやすいほうにしておけばよい。
+
+ここではリストの先頭をスタックの先頭にすることとしよう。すると、たとえば
+$TOP(S)$はリストの先頭の要素を返せばよいのだから、$RETRIEVE(FIRST(S),
+S)$と書くことができる。また$PUSH(x, S)$はリストの先頭に要素$x$を挿入すれ
+ばよいのだから、$INSERT(x, FIRST(S), S)$と書くことができる。
+
+このようにして実装されたスタックは、内部的な実装はリストであるが、外部か
+ら基本操作群によって利用する限り、内部の実装を利用者が知る必要はない。こ
+のように、基本操作群で内部の実装を隠すという考え方を「情報隠蔽」もしくは
+「抽象データ型」と呼ぶことがある。オブジェクト指向プログラミング言語の
+「クラス」は、この考え方を発展させたものである。詳しくは「計算機言語II」
+で述べる。
+
+\subsection{配列による実装}
+
+スタックを配列で実装することもできる。多くの場合、配列の要素数は固定であ
+るから、スタックに積むことのできる最大要素数も固定されることになる。また
+配列では、添字の大きいほうをスタックの先頭にしておくと実装しやすくなる。
+添字の小さいほうをスタックの先頭にすると、一般には要素の挿入・削除のたび
+に配列の詰め直しをしなければならない。
+
+たとえば、スタックを実装する配列を$elements[0\cdots99]$、スタックに現在
+入っている要素数を$length$とすると、$TOP(S)$は$elements[length-1]$を返す
+ような関数として実装できる。また$PUSH(x, S)$は次のような関数として実装で
+きる。
+\begin{quote}
+ \begin{verbatim}
+push(x, S) {
+  if (length == 100) {
+     もう追加できない;
+  } else {
+     elements[length++] = x;
+  }
+}
+ \end{verbatim}
+\end{quote}
+
+\section{キュー(待ち行列)}
+\subsection{定義と基本操作群}
+
+リストの中で、挿入が一方の端から、削除が反対の端からしかできないものを
+\emph{キュー(待ち行列)}という。キューでは、先に追加された要素ほど先に取
+り出されるという性質があり、このことからFIFO (First-In First-Out)と呼ば
+れることもある。
+
+スタックの場合と同様、待ち行列の基本操作群はリストより簡単になる。一例を
+図\ref{fig:queueBasis}に示す。
+\begin{figure}[htbp]
+\begin{screen}
+ \begin{description}
+ \item[$MAKENULL(Q)$] 待ち行列$Q$を空にする。
+ \item[$FRONT(Q)$] 待ち行列$Q$の先頭要素を返す。返した要素は待ち行列から
+            取り除かない。
+ \item[$ENQUEUE(x, Q)$] 要素$x$を待ち行列$Q$の最後に追加する。
+ \item[$DEQUEUE(Q)$] 待ち行列$Q$の先頭要素を$Q$から削除し、その要素を返す。
+ \item[$EMPTY(Q)$] 待ち行列$Q$が空なら真、そうでなければ偽を返す。
+ \end{description}
+\end{screen}
+\caption{待ち行列の基本操作群}
+\label{fig:queueBasis}
+\end{figure}
+
+\subsection{リストによる実装}
+
+スタックの場合と同様、リストのどちらの端を待ち行列の先頭・末尾に対応させ
+るかは決めておく必要がある。リストの基本操作群の種類を考慮しながら、実装
+のしやすいほうに定めればよい。
+
+ここではリストの先頭を待ち行列の先頭、リストの末尾を待ち行列の末尾にそれ
+ぞれ対応させることにする。すると、たとえば$FRONT(Q)$はリストの先頭の要素
+の値を返せばよいのだから$RETRIEVE(FIRST(Q), Q)$と書くことができる。また
+$ENQUEUE(x, Q)$はリストの末尾に要素$x$を加えればよいのだから、
+$INSERT(x, END(Q), Q)$とすればよい。
+
+\subsection{配列による実装}
+
+待ち行列を配列で実装することもできるが、スタックの場合と異なり、少し工夫
+が必要になる。
+
+配列の先頭を待ち行列の先頭、配列の末尾を待ち行列の末尾にそれぞれ対応させ、
+$ENQUEUE(x, Q)$を配列の末尾に要素を加える、$DEQUEUE(Q)$を配列の先頭から
+要素を削除する、という実装方針はすぐ思いつくだろう。しかし、一般に配列の
+要素数は固定であるため、上記の方針だけでは、何回か追加を繰り返すと配列の
+最大要素数に達し、それ以上追加ができなくなってしまう。
+
+これを避ける一つの方法として、論理的に配列が循環しているように実装を行う
+方法がある。つまり、配列の末尾の要素の次がその配列の先頭になるように考え
+るわけである。たとえば、待ち行列を実装する配列を$elements[0\cdots99]$と
+すると、$elements[99]$の次の要素は$elements[0]$であるように実装を行う。
+待ち行列の先頭の添字を表す変数を$front$、長さを表す変数を$length$とする
+と、$ENQUEUE(x, Q)$は次のように実装できる。
+\begin{quote}
+ \begin{verbatim}
+ENQUEUE(x, Q) {
+   if (length == 100) {
+       もう追加できない;
+   } else {
+       elements[(front + length) % 100] = x;
+       length ++;
+   }
+}
+ \end{verbatim}
+\end{quote}
+
+\input{stack-queue}
+\input{queue}
+
+\section{課題: 後置記法の数式の計算}
+
+スタックの応用例として、後置記法で書かれた数式を計算するプログラムを作成
+する。
+
+我々が普段目にする2項演算子は、たいてい、2つの演算数の間に演算子を書く。
+{\sf 32 + 9}, {\sf 4 / 2}といった具合である。これを{\bfseries 中置記
+法}（infix notation）という。しかし、算術式の書き方はこれだけではない。演
+算子を2つの演算数の前に置く{\bfseries 前置記法}（prefix notation）、2 つ
+の演算数の後ろに置く{\bfseries 後置記法}（postfix notation）（または
+{\bfseries 逆ポーランド記法}）という書き方
+もある。ここでは後置記法のみもう少し詳しく説明することにしよう。
+
+中置記法による式$E$の後置記法は次のように再帰的に定義される。
+ \begin{enumerate}
+  \item $E$が変数または定数であれば、$E$の後置記法は$E$である。
+  \item 任意の2項演算子$\op$について、$E_1 \op E_2$の後置記法は
+	$E_1'~E_2'~\op$である。ここで$E_1', E_2'$はそれぞれ$E_1, E_2$の後
+	置記法である。
+  \item $(E)$の後置記法は$E'$である。ここで$E'$は$E$の後置記法である。
+ \end{enumerate}
+
+\begin{exercise}
+ 中置記法の数式$32 + 3$, $9 + 4 * 3$, $(1+2)*4$を後置記法に直せ。
+ \label{ex:prefix_notation}
+\end{exercise}
+
+後置記法で書かれた算術式は、スタック1つで計算できるという特徴を持つ。式を
+左から右に1トークンずつ読み、次の動作を行えばよい。
+\begin{enumerate}
+ \item トークンが数であれば、その数をスタックに積む（push）。
+ \item トークンが演算子$\op$であれば、スタックの上2つの要素（$x, y$とする）
+       をおろし（pop）、$x \op y$を計算し、結果をスタックに積む。
+\end{enumerate}
+これを式の終わりまで行い、最後にスタックに残った数が式の計算結果である。
+
+\begin{exercise}
+ 課題\ref{ex:prefix_notation}で求めた後置記法の数式について、スタックに
+ よる計算を手で行ってみよ。スタックの状態の変化を図示せよ。
+\end{exercise}
+
+\begin{exercise}
+ 後置記法で書かれた数式を計算するプログラムを作成せよ。
+\begin{itemize}
+ \item 入力：後置記法による数式の書かれたファイル1つ。
+
+       後置記法の数式は、整数または四則演算子（$+, -, *, /$）が1個以上並
+       んだ文字列とする。整数や四則演算子は、1個の空白または1個の改行で区
+       切られているものとする。ただし、どうしてもこの通りに実装できない場
+       合は、必ず1個の改行で区切られているとして実装してもよい。
+
+       式の長さや式中に現れる整数には
+       制限を設けない。すなわち、どれだけ式の長さが長くても、またどのよ
+       うな整数が出現しても正しく動作するようにすること。
+ \item 出力：入力の数式を計算した結果。標準出力に出力する。
+ \item 動作に関する仕様：$/$の結果は小数点以下切り捨てとする。
+\end{itemize}
+プログラムの実行例は次のようになる。以下の例では、作成したプログラム名は
+ {\sffamily a.out}であり、カレントディレクトに置かれているとしている。
+\begin{quote}
+ \begin{verbatim}
+% cat testdata.txt
+16 3 + 3 /
+-2 -
+% ./a.out testdata.txt
+8\end{verbatim}
+\end{quote}
+
+実装に用いるスタックは課題\ref{ex:emptystack}〜\ref{ex:deletestack}
+ で実装したものを用いて構わない。さらに、適宜拡張を加えても構わない。拡
+ 張を加えた場合は、どのように拡張したかをレポートに明記すること。
+\end{exercise}
+
+\section{課題：まとめ}
+\begin{exercise}
+ 今回実装したプログラムについて、改良する点があるとすればどのようなこと
+ が考えられるか。また、その改良を実装する場合の実装方針、問題点、難しい
+ と思われる点などについて考察せよ。
+\end{exercise}
+
+\chapter{再帰}
+\section{定義}
+
+関数$f$が、その関数本体の中に$f$自身の適用を含むとき、関数$f$を再帰関数
+(recursive function)という。一般的には、$f$から直接的に$f$が呼び出される
+場合だけではなく、間接的に呼び出される場合も再帰関数という。
+
+特に、関数$f$の中で直接的にたかだか1回しか$f$を呼び出さない場合を線形再
+帰(linear recursive)、2回以上の$f$の呼び出しを含む場合を非線形再帰
+(non-linear recursive)という。
+
+再帰関数には、必ず以下の2つの部分が含まれる。
+\begin{enumerate}
+ \item 基底 (basis)…再帰を含まない計算
+ \item 帰納段階 (induction step)…再帰を含む計算
+\end{enumerate}
+
+再帰関数は、リストや木などの再帰的なデータ構造\footnote{フラクタルなども
+再帰的なデータ構造を持っている。}を扱うアルゴリズムにおいて特に強力な計
+算手段であることが知られている。
+
+\subsection{再帰関数の例}
+
+ここではプログラミング言語MLを用いて再帰関数の例を示す。
+
+\paragraph{階乗計算}
+
+自然数$n$の階乗は以下のアルゴリズムで計算できる。
+\begin{itemize}
+ \item $n=0$のとき1
+ \item $n\geq 1$のとき$n * (n-1)!$
+\end{itemize}
+これをMLで書くと次のようになる。
+\begin{quote}
+ \begin{verbatim}
+fun factorial(n) = 
+    if n = 0 then 1 else n * factorial(n - 1);
+ \end{verbatim}
+\end{quote}
+
+\paragraph{リストの逆順並び替え}
+
+リスト$L$を逆順に並び替える操作は以下のアルゴリズムで計算できる。
+\begin{itemize}
+ \item $L$が空リストのとき、結果は空リストである。
+ \item $L$が空リストでないとき、$tl(L)$を逆順に並び替えたリストの後ろに、
+       $hd(L)$だけからなるリストを連接したものになる。ただし、$hd(L)$,
+       $tl(L)$はそれぞれ$L$の頭部、尾部を表す。
+\end{itemize}
+これをMLで実装すると次のようになる。
+\begin{quote}
+ \begin{verbatim}
+fun reverse(L) = 
+    if L = nil then nil
+               else reverse(tl(L)) @ [hd(L)];
+ \end{verbatim}
+\end{quote}
+
+\subsection{再帰関数の実装上の注意}
+
+再帰関数を実装する場合、いくつか決まりごとがある。
+\begin{itemize}
+ \item 基底、帰納段階を必ず両方とも作り、引数の値などによって条件分岐さ
+       せる。たとえば整数を引数に取る関数の場合は0(もしくは1)かどうかで、
+       またリストを引数に取る場合は、リストが$nil$かどうかで、基底・帰納
+       段階のいずれかに条件分岐させることがひじょうに多い。
+ \item 帰納段階での再帰呼び出しでは、必ず引数の値を小さくして呼び出すよ
+       うにする。たとえば、整数の場合は$n-1$、リストの場合は$tl(L)$など
+       とする。これと、上記の条件分岐により、再帰関数はいつか必ず基底の
+       計算を行い(無限に帰納段階を繰り返すことはない)、計算が停止するこ
+       とが保証される。
+\end{itemize}
+
+\input{recursion}
+
+\section{課題：まとめ}
+
+\begin{exercise}
+ 今回実装したプログラムについて、改良する点があるとすればどのようなこと
+ が考えられるか。また、その改良を実装する場合の実装方針、問題点、難しい
+ と思われる点などについて考察せよ。
+\end{exercise}
+
+\chapter{木}
+
+木は、集合の要素に階層構造を与えるときにしばしば用いられる概念であり、情
+報科学の分野でもっとも重要なデータ構造の一つである。木の定義、基本的な用
+語などについては添付の資料を参照のこと。
+
+木のある節点に着目すると、その子節点を根とする木(部分木)が必ず存在する。
+この意味で、木は再帰的なデータ構造であり、木を扱うアルゴリズムは再帰で考
+えると簡単になるものが多い。とくに典型的なものが、木の節点をすべてたどる
+アルゴリズムのうち\emph{深さ優先探索(depth first search)}と呼ばれるもの
+である。このバリエーションとして行きがけ順(preorder)、通りがけ順
+(inorder)、帰りがけ順(postorder)という3種類の全節点の順序づけの方法が知
+られている。
+
+\section{2分木}
+
+今回の実験では、簡単のため、\emph{2分木}と呼ばれる特殊な木のみ扱うことに
+する。2分木は、節点の子がたかだか2つしかない(つまり、0、1、もしくは2)木
+である。左側の子節点を根とする木を左部分木、右側の子節点を根とする木を右
+部分木という。2分木の基本操作群の一例を図\ref{fig:binTreeBasis}に示す。
+\begin{figure}[htbp]
+\begin{screen}
+  \begin{description}
+  \item[$Node\ CREATENODE(Label\ label, Node\ left, Node\ right)$] $label$を
+             ラベルとする節点を根、$left$を根とする木を左部分木、$right$
+             を根とする木を右部分木とする2分木を生成する。
+  \item[$Node\ LEFTNODE(Node\ n)$] 節点$n$の左部分木の根である節点を返す。
+  \item[$Node\ RIGHTNODE(Node\ n)$] 節点$n$の右部分木の根である節点を返す。
+ \end{description}
+\end{screen} 
+\caption{2分木の基本操作群}
+ \label{fig:binTreeBasis}
+\end{figure}
+
+2分木の節点は、子節点がたかだか2つと限られているので、次のような属性から
+構成される構造体として実現すると簡単である。
+\begin{itemize}
+ \item その節点につけられているラベル
+ \item 左部分木の根である節点へのポインタ。左部分木がない場合はNULL。
+ \item 右部分木の根である節点へのポインタ。右部分木がない場合はNULL。
+\end{itemize}
+
+\input{tree}
+\section{課題：まとめ}
+\begin{exercise}
+ 今回実装したプログラムについて、改良する点があるとすればどのようなこと
+ が考えられるか。また、その改良を実装する場合の実装方針、問題点、難しい
+ と思われる点などについて考察せよ。
+\end{exercise}
+
+\chapter{2分探索木}
+
+計算機で大量のデータを扱う場合、単なる配列や連結リストでは検索・挿入・削
+除などの操作がひじょうに遅くなる。たとえば配列で10,000件のデータを持って
+いるときに、その先頭に1つ要素を挿入しようとすると、10,000件のデータをす
+べて1つずつ後ろへずらさなければならない\footnote{アルゴリズムの計算量が
+$O(n)$ (データ数$n$に比例する)であるという。これは、検索ではかなり時間が
+かかる部類に入る。}。そこで、より効率の良いデータ操作が行えるデータ構造
+がいろいろ考えられている。
+
+この実験では、それらの中で比較的簡単な2分探索木(binary search tree)を取
+り上げる。これは2分木の特殊な場合であり、先に述べた2分木を用いて実装する
+ことができる。
+
+\section{定義}
+
+2分探索木は、次の規則に基づいて各節点に集合の要素を1つずつ対応づけた2分
+木である\footnote{ここでは「小さい」「大きい」という言葉を用いて直感的に
+説明しているが、厳密には全順序(total order)であればよい。整数や実数の大
+小関係、文字列の辞書順などは全順序の例である。}
+\begin{itemize}
+ \item 任意の節点$x$に対し、$x$の左部分木に格納された要素はすべて$x$より
+       小さい。
+ \item 任意の節点$x$に対し、$x$の右部分木に格納された要素はすべて$x$より
+       大きい。
+\end{itemize}
+図\ref{fig:BSTExample}に2分探索木の例を示す。
+\begin{figure}[htbp]
+\begin{center}
+  \includegraphics{bintree.eps}
+\end{center}
+ \caption{2分探索木の例}
+ \label{fig:BSTExample}
+\end{figure}
+% 図を挿入
+
+\section{基本操作群}
+
+2分探索木に対する基本操作群には図\ref{fig:bstBasis}のようなものが考えられる。
+\begin{figure}[htbp]
+\begin{screen}
+ \begin{description}
+ \item[$MEMBER(x, A)$] 要素$x$が2分探索木$A$に含まれているかどうかを調べる。
+ \item[$INSERT(x, A)$] 要素$x$を2分探索木$A$に挿入する。結果は2分探索木
+            になっていなければならない。
+ \item[$MIN(A)$] 2分探索木$A$のうち、最小の要素に対応づけられている節点を得る。
+ \item[$DELETE(x, A)$] 要素$x$を2分探索木$A$から削除する。結果は2分探索
+            木になっていなければならない。
+ \end{description}
+\end{screen}
+\caption{2分探索木に対する基本操作群}
+\label{fig:bstBasis}
+\end{figure}
+これらの操作はいずれも再帰的な手続きによって記述することができる。たとえ
+ば$MEMBER(x, A)$は次のようになる。
+\begin{quote}
+ \begin{verbatim}
+boolean MEMBER(x, A) {
+    if (A == nil) {
+        return false; /* 2分探索木は空 */
+    } else if (x == A.iData) {
+        return true;  /* A の根と x が一致 */
+    } else if (x < A.iData) {
+        return MEMBER(x, A.leftTree);  /* x があるなら左部分木の中 */
+    } else {  /* x > A.iData */
+        return MEMBER(x, A.rightTree); /* x があるなら右部分木の中 */
+    }
+}
+ \end{verbatim}
+\end{quote}
+
+$INSERT(x, A)$, $DELETE(x, A)$は、結果がまた2分探索木になっていなければ
+ならないため、実装が複雑になる。例として$DELETE(x, A)$のアルゴリズムの概
+略を示す。
+\begin{screen}
+ \begin{enumerate}
+ \item $A$が空であれば($A$には$x$は含まれていなかったので)何もしない。
+ \item $A$が空でなければ
+       \begin{enumerate}
+        \item $x < A.iData$であれば、$x$が含まれているとすれば左部分木の
+              中なので、$A$の左部分木から$x$を消去し、結果として得られた
+              2分探索木を$A$の左部分木とする。
+        \item $x > A.iData$であれば、$x$が含まれているとすれば右部分木の
+              中なので、$A$の右部分木から$x$を消去し、結果として得られた
+              2分探索木を$A$の右部分木とする。
+        \item $x == A.iData$であれば、$A$の根を消すことになる。
+              \begin{enumerate}
+	       \item $A$が葉(左部分木も右部分木もない)であれば、単に$A$を消す。
+               \item $A$に右部分木がなければ、$A$の根を削除して得られる2
+                     分探索木は$A$の左部分木そのものになる。
+               \item $A$に左部分木がなければ、$A$の根を削除して得られる2
+                     分探索木は$A$の右部分木そのものになる。
+               \item $A$に左部分木も右部分木もあれば、右部分木中の最小の
+                     要素を求める。これを$y$とすると、$x$を削除して得ら
+                     れる2分探索木は、根が$y$、左部分木が$A.leftTree$、
+                     右部分木が$DELETE(y, A.rigthTree)$となる。
+              \end{enumerate}
+       \end{enumerate}
+ \end{enumerate}
+\end{screen}
+
+\input{binarysearch}
+
+\section{課題：まとめ}
+\begin{exercise}
+ 今回実装したプログラムについて、改良する点があるとすればどのようなこと
+ が考えられるか。また、その改良を実装する場合の実装方針、問題点、難しい
+ と思われる点などについて考察せよ。
+\end{exercise}
+
+以下の課題は成績評価には加えませんので、なるべく正直に書いてもらえると
+助かります。
+
+\begin{exercise}
+ 今回の6週の実験を通して自分が学んだ(り学$\{$ば$\mid$べ$\}$なかった)こと
+ を自分なりに考察し、今後のことも含めて書いて下さい。6週の実験を通しての
+ 感想なども適宜織り交ぜていただいて構いません。
+\end{exercise}
+
+\end{document}

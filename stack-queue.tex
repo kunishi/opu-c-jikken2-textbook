@@ -1,0 +1,263 @@
+%#!platex kadai2006_3
+
+\section{スタックの実装}
+
+\subsection{プログラムの仕様}
+
+\begin{itemize}
+\item 内部構造として連結リストを用いる。
+\item 先週作成したリスト操作ライブラリをできる限り活用する。
+\item スタックの先頭を連結リストのどちら側に対応させるかは各自で決めるこ
+      と。
+\item 扱うデータは \texttt{int} 型のデータとする。
+\item 操作関数は、スタックの新規作成 (MAKENULL）、先頭データの取得
+  (TOP）、先頭セルの取り出し (POP）、データの新規追加 (PUSH）、空スタッ
+  クの検査 (EMPTY）にスタック全体の削除を加えた計 6 関数から構成する。
+\end{itemize}
+
+また、実使用時に利用しやすいように、構造体宣言、関数のプロトタイプ宣言
+等はヘッダファイル（例えば \verb-stack.h-）に、操作関数群と操作プログ
+ラムは別ファイル（例えば \verb-stack.c- と \verb+stack-test.c+）とし、
+コンパイルには \texttt{make} を用いるようにすること。
+
+なお、前回作成したリスト操作ライブラリを利用することから、今回の課題に
+おいて構造体メンバへの直接アクセスは不要となるはずである。
+課題回答中にこのような操作が必要となった場合には、リスト操作関数のいず
+れかで代用できるはずであるので、その点を考慮すること。
+
+\subsection{課題}
+
+\begin{exercise}\label{ex:emptystack}
+  空スタックを作成してそのポインタ (ダミーセルへのポインタ）を返す関数
+ \begin{quote}
+  \verb-struct cell *makeNullStack(void);-
+ \end{quote}
+ を作成せよ。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \small
+\begin{verbatim}
+/*
+ *  Make null stack and return pointer to stack
+ */
+struct cell *makeNullStack(void)
+{
+  return makeNullList();  /* call makeNullList() */
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  指定されたスタックが空 (1）か否 (0）かを返す関数
+ \begin{quote}
+  \verb-int emptyStack(struct cell*);-
+ \end{quote}
+  を作成せよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 S2】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Test the stack is empty or not
+%  */
+% int emptyStack(struct cell *stack)
+% {
+%   if (firstCell(stack) == (struct cell*)NULL) {
+%     return 1;
+%   } else {
+%     return 0;
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  引数として指定されたスタックのトップセルが保持しているデータを返す関
+  数
+\begin{quote}
+  \verb-int topStack(struct cell*);-
+\end{quote}
+ を作成せよ。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \small
+\begin{verbatim}
+/*
+ *  Return data of the top stack
+ */
+int topStack(struct cell *stack)
+{
+  return retrieveCell(firstCell(stack), stack);
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  引数として指定されたスタックのトップデータを返し、そのセルを取り除く
+  関数
+ \begin{quote}
+  \verb-int popStack(struct cell*);-
+ \end{quote}
+ を作成せよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 S4】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Take out from stack and return the data
+%  */
+% int popStack(struct cell *stack)
+% {
+%   int data = 0;  /* stacked data (initially 0) */
+
+
+%   /* do when stack is not empty */
+%   if (emptyStack(stack) == 0) {
+%     /* get data of the top stack */
+%     data = retrieveCell(firstCell(stack), stack);
+%     /* delete cell */
+%     deleteCell(firstCell(stack), stack);
+%   }
+
+%   return data;
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  引数として与えられたデータをスタックに追加する関数
+  \begin{quote}
+   \verb-void pushStack(int, struct cell*);-
+  \end{quote}
+ を作成せよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 S5】}
+%   \small
+% \begin{verbatim}
+% \end{verbatim}
+% /*
+%  *  Stack on a data to stack
+%  */
+% void pushStack(int data, struct cell *stack)
+% {
+%   insertCell(data, firstCell(stack), stack);
+% }
+% \end{screen}
+
+\begin{exercise}\label{ex:deletestack}
+  引数として指定されたスタックに残っているすべてのセルを削除し、スタッ
+  クのダミーセルまでも削除する関数
+  \begin{quote}
+   \verb-void deleteStack(struct cell*);-
+  \end{quote}
+ を作成せよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 S6】}
+% \begin{verbatim}
+% /*
+%  *  Delete all cells in the stack and delete the stack。
+%  */
+% void deleteStack(struct cell *stack)
+% {
+%   deleteList(stack);  /* call deleteList() */
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+ ここまでに作成したスタック操作関数群の動作を確認するような
+ \texttt{main()}関数を作成し、動作を確かめよ。
+\end{exercise}
+
+% \section*{スタック操作プログラム例}
+% \label{StackExample}
+
+% 作成したスタック操作関数群を利用したプログラムの例を示す。
+
+% \begin{screen}
+%   \noindent\textbf{【プログラム例】}
+%   \small
+% \begin{verbatim}
+% #include <stdio.h>
+% #include "list.h"
+% #include "stack.h"
+
+% int main(void)
+% {
+%   struct cell *stack;
+%   int n = 20;  /* 学籍番号の下二桁に変更のこと */
+
+%   stack = makeNullStack();
+
+%   pushStack(10, stack);
+%   printf("top: %d\n", topStack(stack));
+%   pushStack(n, stack);
+%   printf("top: %d\n", topStack(stack));
+%   pushStack(30, stack);
+%   printf("top: %d\n", topStack(stack));
+
+%   printf("pop: %d\n", popStack(stack));
+
+%   printf("empty?: %d\n", emptyStack(stack));
+%   printf("pop: %d\n", popStack(stack));
+
+%   printf("empty?: %d\n", emptyStack(stack));
+%   printf("pop: %d\n", popStack(stack));
+
+%   printf("empty?: %d\n", emptyStack(stack));
+
+%   deleteStack(stack);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【実行例】}
+
+%   ※プログラムによっては結果はこのとおりにならない場合があります。
+%   \small
+% \begin{verbatim}
+% top: 10
+% top: 20
+% top: 30
+% pop: 30
+% empty?: 0
+% pop: 20
+% empty?: 0
+% pop: 10
+% empty?: 1
+% \end{verbatim}
+% \end{screen}
+
+
+% % \section*{関数プロトタイプ}
+% % \label{StackPrototype}
+
+% % \begin{screen}
+% %   \small
+% % \begin{verbatim}
+% % #include "list.h"
+
+% % struct cell *makeNullStack(void);              /* returns stack  */
+% % int topStack(struct cell *stack);              /* returns data   */
+% % int popStack(struct cell *stack);              /* returns data   */
+% % void pushStack(int data, struct cell *stack);  /* no return      */
+% % int emptyStack(struct cell *stack);            /* returns 1 or 0 */
+% % void deleteStack(struct cell *stack);          /* no return      */
+% % \end{verbatim}
+% % \end{screen}
+

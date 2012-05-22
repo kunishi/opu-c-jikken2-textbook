@@ -1,0 +1,601 @@
+%#!platex kadai2006_3
+\section{再帰プログラミング}
+
+\subsection{数に関する再帰}
+
+\begin{example}
+  $1$ から引数で指定された正の整数値までの和を返す関数
+  \verb-int sigma(int);- を再帰を用いて作成せよ。
+  \begin{eqnarray*}
+    sigma(n) & = & n + sigma(n - 1)\\
+    & = & n + (n - 1) + sigma(n - 2)\\
+    & \vdots &\\
+    & = & n + (n - 1) + \cdots + sigma(1)\\
+    & = & n + (n - 1) + \cdots + 1
+  \end{eqnarray*}
+\end{example}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+int sigma(int num)
+{
+  int result;  /* calculation result */
+
+  if (num <= 1) {
+    result = num;
+  } else {
+    result = num + sigma(num - 1);
+  }
+
+  return result;
+}
+\end{verbatim}
+\end{screen}
+
+\begin{screen}
+  \noindent\textbf{【\texttt{main} 関数の例】}
+  \scriptsize
+\begin{verbatim}
+int main(int argc, char *argv[])
+{
+  /* check arguments */
+  if (argc != 2) {
+    fprintf(stderr, "Usage: %s num\n", argv[0]);
+    exit(1);
+  }
+
+  /* check argument sign */
+  if (atoi(argv[1]) < 0) {
+    fprintf(stderr, "Error: The argument must be a positive value.\n");
+    exit(1);
+  }
+
+  /* calculation and print result */
+  printf("sigma(%d) = %d\n", atoi(argv[1]), sigma(atoi(argv[1])));
+
+  return 0;
+}
+\end{verbatim}
+% ※ \verb-atoi- 関数は文字列を整数値に変換する関数である。
+\end{screen}
+
+\begin{exercise}
+  (発展) 上記の解答例では、引数として与える値に制限が存在する。
+%%   その制限値を数学的に求めた値と実験的に求めた値との比較により推定せよ。
+%%   また、そのような制限が発生した理由を考察せよ。
+  その制限値の上限についてあらかじめ推定せよ。
+  また、様々な値を引数として与え、その推定の正否を確認するとともに、そ
+  の様な制限が発生している理由を文献等により調査せよ。
+\end{exercise}
+
+\begin{exercise}
+$1, 1, 2, 3, 5, 8, 13, 21, 34, 55, \ldots$ という数列を
+\textbf{フィボナッチ数列} という。
+この数列の最初の 2 要素は $1$ であり、それ以降の要素はその前 2 つの要
+素の和となっている。
+例えば 5 番目の要素は、その前 2 つの要素である 3, 4 番目の要素 $2$ と
+$3$ の和であるから $2 + 3 = 5$ となっている。
+
+  フィボナッチ数列において、引数で指定された順番に位置する要素を返す関
+  数 \verb-int fibonacci(int);- を再帰を用いて作成せよ。また、この関数の
+ 動作を確かめる \texttt{main()}関数を作成し、動作を確かめよ。
+
+  \begin{eqnarray*}
+    fibonacci(n) & = & fibonacci(n - 1) + fibonacci(n - 2)\\
+   & = & \{ fibonacci(n - 2) + fibonacci(n - 3) \}
+        + \{ fibonacci(n - 3) + fibonacci(n - 4) \}\\
+    & \vdots &
+  \end{eqnarray*}
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 \arabic{section}】}
+%   \small
+% \begin{verbatim}
+% int fibonacci(int num)
+% {
+%   int result;  /* calculation result */
+
+%   if (num <= 2) {
+%     result = 1;
+%   } else {
+%     result = fibonacci(num - 1) + fibonacci(num - 2);
+%   }
+
+%   return result;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【\texttt{main} 関数の例 \arabic{section}】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(int argc, char *argv[])
+% {
+%   /* 引数の数の確認と使用方法の表示 */
+
+%   /* calculation and print result */
+%   printf("fibonacci(%d) = %d\n", atoi(argv[1]), fibonacci(atoi(argv[1])));
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+\subsection{リストに関する再帰}
+
+これ以降の課題については、前回に作成したリスト操作関数を用いること。
+
+\begin{exercise}
+  リストへのポインタを引数としてとり、その内容を逆順に並べ替えたリスト
+  へのポインタを返す関数 \verb-struct cell *reverseList(struct cell*);- を
+  再帰を用いて作成せよ。また、この関数の動作を確かめる \texttt{main()}関
+ 数を作成し、動作を確かめよ。
+  なお、並べ替え後に元のリストが破壊されていても構わない
+  \footnote{すなわち、\texttt{printList(list)} の結果が変化しても構わ
+  ない。}。
+
+  \begin{eqnarray*}
+    reverseList( [ 3, 6, 4, 5, 2 ] )
+    & = & reverseList( [ 6, 4, 5, 2 ] ) @ [ 3 ] (@はリストの連結演算を表
+    す)\\
+    & = & reverseList( [ 4, 5, 2] ) @ [ 6 ] @ [ 3 ]\\
+    & \vdots &\\
+    & = & [ 2, 5, 4, 6, 3 ]
+  \end{eqnarray*}
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 \arabic{section}】}
+%   \small
+% \begin{verbatim}
+% struct cell *reverseList(struct cell *list)
+% {
+%   struct cell *rev;  /* reversed list */
+%   int data;  /* cell data */
+
+%   if (firstCell(list) != (struct cell*)NULL) {
+%     /* retrieve and delete first cell */
+%     data = retrieveCell(firstCell(list), list);
+%     deleteCell(firstCell(list), list);
+
+%     /* reverse list */
+%     rev = reverseList(list);
+
+%     /* insert retrieved data to tail */
+%     insertCell(data, nextCell(endCell(rev), rev), rev);
+%   } else {
+%     rev = makeNullList();
+%   }
+
+%   return rev;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【\texttt{main} 関数の例 \arabic{section}】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(int argc, char *argv[])
+% {
+%   struct cell *list;  /* original list */
+%   struct cell *rev;  /* reversed list */
+
+%   /* check arguments */
+%   if (argc < 2) {
+%     fprintf(stderr, "Usage: %s num1 num2 num3 ...\n", argv[0]);
+%     exit(1);
+%   }
+
+%   /* make null list */
+%   list = makeNullList();
+
+%   /* コマンドライン引数で与えられた値を順にリスト list として作成する */
+
+%   /* print initial */
+%   printf("Initial: ");
+%   printList(list);
+
+%   /* reverse list */
+%   rev = reverseList(list);
+
+%   /* print result */
+%   printf("reverse: ");
+%   printList(rev);
+
+%   /* delete list */
+%   deleteList(list);
+%   deleteList(rev);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  与えられたリスト \texttt{list} を二分割した結果を
+  \texttt{list1}、\texttt{list2} として返す再帰関数を作成せよ。
+  プロトタイプ宣言は次のとおりとする。
+
+ \begin{quote}
+  \verb-void divideList(struct cell *list, struct cell *list1, struct cell *list2);-
+ \end{quote}
+ 
+  分割は、\texttt{list} の奇数番目のデータを \texttt{list1} に、偶
+  数番目のデータを \texttt{list2} に格納するという手順で行うこと。
+  なお、並べ替え後に元のリストが破壊されていても構わない
+  \footnote{すなわち、\texttt{printList(list)} の結果が変化しても構わ
+  ない。}。
+
+また、この関数の動作を確かめる \texttt{main()}関
+ 数を作成し、動作を確かめよ。
+
+  \textbf{参考)}
+  $pcList = [ 1, 2, 3, 4, 5 ]$ のとき、
+  \[
+  \left\{
+    \begin{array}{lcl}
+      list1 & = &
+      [ 1 ]
+      @ ( \mbox{$[ 3, 4, 5 ]$ を divideList した結果得られる $list1$} )\\
+      & = & [ 1 ]
+      @ ( [ 3 ] @ (\mbox{$[ 5 ]$ を divideList した結果得られる $list1$} ))、\\
+      list2 & = &
+      [ 2 ]
+      @ ( \mbox{$[ 3, 4, 5 ]$ を divideList した結果得られる $list2$} )\\
+      & = & [ 2 ]
+      @ ( [ 4 ] @ (\mbox{$[ 5 ]$ を divideList した結果得られる $list2$} ))
+    \end{array}
+  \right.
+  \]
+%   \texttt{list = [ 1, 2, 3, 4, 5 ]} のとき、\texttt{divideList} を実行し
+%   た結果得られる \texttt{list1} および \texttt{list2} は
+%   \texttt{list1 = [ 1, 3, 5 ]}、\texttt{list2 = [ 2, 4 ]} となる。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 \arabic{section}】}
+%   \small
+% \begin{verbatim}
+% void divideList(struct cell *list, struct cell *list1, struct cell *list2)
+% {
+%   int data1, data2;  /* cell data */
+
+%   if (firstCell(list) != (struct cell*)NULL) {
+%     /* retrieve and delete first cell of list */
+%     data1 = retrieveCell(firstCell(list), list);
+%     deleteCell(firstCell(list), list);
+
+%     if (firstCell(list) != (struct cell*)NULL) {
+%       /* retrieve and delete second cell of list */
+%       data2 = retrieveCell(firstCell(list), list);
+%       deleteCell(firstCell(list), list);
+
+%       /* call divideList */
+%       divideList(list, list1, list2);
+
+%       /* insert retrieved data to first cell */
+%       insertCell(data2, firstCell(list2), list2);
+%     }
+
+%     /* insert retrieved data to first cell */
+%     insertCell(data1, firstCell(list1), list1);
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【\texttt{main} 関数の例 \arabic{section}】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(int argc, char *argv[])
+% {
+%   struct cell *list;  /* original list */
+%   struct cell *list1, *list2;  /* odd, even list */
+
+%   /* 引数の数の確認と使用方法の表示 */
+
+%   /* make null lists */
+%   list = makeNullList();
+%   list1 = makeNullList();
+%   list2 = makeNullList();
+
+%   /* コマンドライン引数で与えられた値を順にリスト list として作成する */
+
+%   /* print initial */
+%   printf("Initial: ");
+%   printList(list);
+
+%   /* divide list */
+%   divideList(list, list1, list2);
+
+%   /* print divide results */
+%   printf("List1:   ");
+%   printList(list1);
+%   printf("List2:   ");
+%   PrintList(list2);
+
+%   /* delete lists */
+%   deleteList(list);
+%   deleteList(list1);
+%   deleteList(list2);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  与えられた 2 つのリストを結合する再帰関数を作成せよ。
+  プロトタイプ宣言は次のとおりとする。
+
+ \begin{quote}
+  \verb-void mergeList(struct cell *list1, struct cell *list2, struct cell *merged);-
+ \end{quote}
+
+  結合は、\texttt{list1} および \texttt{list2} それぞれの先頭のデー
+  タを比較し、小さい方のデータを \texttt{merged} に追加するという手順
+  で行う。
+  なお、並べ替え後に元のリスト \texttt{list1} および \texttt{list2} が
+  破壊されていても構わない
+  \footnote{すなわち、\texttt{printList(list1)}、
+  \texttt{printList(list2)} の結果が変化しても構わない。}。
+
+また、この関数の動作を確かめる \texttt{main()}関
+ 数を作成し、動作を確かめよ。
+
+  \textbf{参考)}
+  $list1 = [ 3, 6, 2 ]$、$list2 = [ 4, 5, 7 ]$ のとき、
+  \[
+  \begin{array}{lcl}
+    merged
+    & = & [ 3 ] @ ( [ 6, 2 ]、[ 4, 5, 7 ] \mbox{を mergeList した結果得られる merged} )\\
+    & = & [ 3 ] @ ( [ 4 ] @ ([ 6, 2 ]、[ 5, 7 ] \mbox{を mergeList した結果得られる merged} ))\\
+    & = & \cdots
+  \end{array}
+  \]
+
+%   \makebox[8.0mm]{}
+%   $merged = [ 3 ] +
+%     ( \mbox{[ 6, 2 ]、[ 4, 5, 7 ] を mergeList した結果得られる merged} )$
+
+%   となる。
+%   \texttt{list1 = [ 3, 6, 2 ]} と \texttt{list2 = [ 4, 5, 7 ]} に
+%   対して \texttt{mergeList} を実行した結果得られる \texttt{merged} は
+%   \texttt{merged = [ 3, 4, 5, 6, 2, 7 ]} となる。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 \arabic{section}】}
+%   \small
+% \begin{verbatim}
+% void mergeList(struct cell *list1, struct cell *list2, struct cell *merged)
+% {
+%   int data1, data2;  /* cell data */
+
+%   if ((firstCell(list1) == (struct cell*)NULL) &&
+%       (firstCell(list2) == (struct cell*)NULL)) {
+%     return;
+%   }
+
+%   if (firstCell(list1) == (struct cell*)NULL) {
+%     insertCell(retrieveCell(firstCell(list2), list2),
+%                nextCell(endCell(merged), merged), merged);
+%     deleteCell(firstCell(list2), list2);
+%   } else if (firstCell(list2) == (struct cell*)NULL) {
+%     insertCell(retrieveCell(firstCell(list1), list1),
+%                nextCell(endCell(merged), merged), merged);
+%     deleteCell(firstCell(list1), list1);
+%   } else {
+%     /* retrieve first cell's data of list1, list2 */
+%     data1 = retrieveCell(firstCell(list1), list1);
+%     data2 = retrieveCell(firstCell(list2), list2);
+
+%     /* merge smaller data to merged */
+%     if (data1 < data2) {
+%       insertCell(data1, nextCell(endCell(merged), merged), merged);
+%       deleteCell(firstCell(list1), list1);
+%     } else {
+%       insertCell(data2, nextCell(EndCell(merged), merged), merged);
+%       deleteCell(firstCell(list2), list2);
+%     }
+%   }
+
+%   /* call mergeList recursively */
+%   mergeList(list1, list2, merged);
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【\texttt{main} 関数の例 \arabic{section}】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(void)
+% {
+%   struct cell *list1, *list2;  /* original lists */
+%   struct cell *merged;  /* marged list */
+%   char buf[256];  /* input buffer */
+
+%   /* make null lists */
+%   list1 = makeNullList();
+%   list2 = makeNullList();
+%   merged = makeNullList();
+
+%   /* store arguments to list1 */
+%   puts("Input data of 1st list (END = \"END\"):");
+%   while (strcmp(fgets(buf, 255, stdin), "END\n") != 0) {
+%     insertCell(atoi(buf), nextCell(endCell(list1), list1), list1);
+%   }
+
+%   /* list2 の内容をキーボードから入力し、リストを作成する */
+
+%   /* print initial */
+%   printf("first list:  ");
+%   printList(list1);
+%   printf("second list: ");
+%   printList(list2);
+
+%   /* merge */
+%   mergeList(list1, list2, merged);
+
+%   /* print merge results */
+%   printf("merged list: ");
+%   printList(merged);
+
+%   /* delete lists */
+%   deleteList(list1);
+%   deleteList(list2);
+%   deleteList(merged);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+ 作成した \texttt{divideList} と \texttt{mergeList} を利用することで、
+ リストの並べ替えを行うことができる。
+ 並べ替えを行う関数が \texttt{mergeSort} であるとき、並べ替えは、
+\begin{enumerate}
+ \item 与えられたリストを \texttt{divideList} によって二分割、
+ \item 分割した結果をそれぞれ \texttt{mergeSort} で並べ替え、
+ \item 並べ替えた結果 2 つを \texttt{mergeList} で結合、
+\end{enumerate}
+という手順で実現できる。
+この手法は \textbf{マージソート} として知られている。
+
+  与えられたリスト \texttt{list} からその内容を昇順に並べ替えたリ
+  スト \texttt{sorted} を得る再帰関数を作成せよ。プロトタイプ宣言は以下
+ のようになる。
+
+  \begin{quote}
+  \verb-void mergeSort(struct cell *list, struct cell *sorted);-
+  \end{quote}
+
+ また、この関数の動作を確かめる \texttt{main()}関
+ 数を作成し、動作を確かめよ。
+
+  \textbf{参考)}
+  \texttt{list = [ 4, 7, 2, 3, 9, 1 ]} が与えられたとき、
+  \texttt{mergeSort} を実行した結果得られる \texttt{sorted} は
+  \texttt{sorted = [ 1, 2, 3, 4, 7, 9 ] } となる。
+
+  \small
+  \[
+  [ 4, 7, 2, 3, 9, 1 ] \rightarrow \fbox{\texttt{divideList}} \rightarrow
+  \left\{\!\!\!\!
+    \begin{array}{c@{ }c@{ }c@{ }c@{ }c}
+       \left[ 4, 2, 9 \right] & \rightarrow
+       & \fbox{\texttt{mergeSort}} & \rightarrow & [ 2, 4, 9 ]\\
+       \\
+       \left[ 7, 3, 1 \right] & \rightarrow
+       & \fbox{\texttt{mergeSort}} & \rightarrow & [ 1, 3, 7 ]
+    \end{array}
+  \!\!\!\!\right\} \rightarrow \fbox{\texttt{mergeList}} \rightarrow
+  [ 1, 2, 3, 4, 7, 9 ]
+  \]
+
+  さらに $[ 4, 2, 9 ]$ の \texttt{mergeSort} は次のようになる。
+
+  \[
+  [ 4, 2, 9 ] \rightarrow \fbox{\texttt{divideList}} \rightarrow
+  \left\{
+    \begin{array}{c@{ }c@{ }c@{ }c@{ }c}
+       \left[ 4, 9 \right] & \rightarrow
+       & \fbox{\texttt{mergeSort}} & \rightarrow & [ 4, 9 ]\\
+       \\
+       \left[ 2 \right] & \rightarrow
+       & \fbox{\texttt{mergeSort}} & \rightarrow & [ 2 ]
+    \end{array}
+  \right\} \rightarrow \fbox{\texttt{mergeList}} \rightarrow
+  [ 2, 4, 9 ]
+  \]
+
+  \normalsize
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 \arabic{section}】}
+%   \small
+% \begin{verbatim}
+% void mergeSort(struct cell *list, struct cell *sorted)
+% {
+%   struct cell *list1, *list2;  /* odd, even lists */
+%   struct cell *sorted1, *sorted2;  /* partial sorted lists */
+
+%   if (firstCell(list) == (struct cell*)NULL) {
+%     return;
+%   } else if (nextCell(firstCell(list), list) == (struct cell*)NULL) {
+%     insertCell(retrieveCell(firstCell(list), list),
+%                nextCell(endCell(sorted), sorted), sorted);
+%   } else {
+%     /* make null lists */
+%     list1 = makeNullList();
+%     list2 = makeNullList();
+%     sorted1 = makeNullList();
+%     sorted2 = makeNullList();
+
+%     /* divide list */
+%     divideList(list, list1, list2);
+
+%     /* sort odd list (result is stored to sorted1) */
+%     mergeSort(list1, sorted1);
+
+%     /* sort even list (result is stored to sorted2) */
+%     mergeSort(list2, sorted2);
+
+%     /* merge list */
+%     mergeList(sorted1, sorted2, sorted);
+
+%     /* delete lists */
+%     deleteList(list1);
+%     deleteList(list2);
+%     deleteList(sorted1);
+%     deleteList(sorted2);
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【\texttt{main} 関数の例 \arabic{section}】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(int argc, char *argv[])
+% {
+%   struct cell *list;  /* original list */
+%   struct cell *sorted;  /* sorted list */
+
+%   /* 引数の数の確認と使用方法の表示 */
+
+%   /* make null lists */
+%   list = makeNullList();
+%   sorted = makeNullList();
+
+%   /* コマンドライン引数で与えられた値を順にリスト list として作成する */
+
+%   /* print original */
+%   printf("Original: ");
+%   printList(list);
+
+%   /* merge sort */
+%   mergeSort(list, sorted);
+
+%   /* print divide results */
+%   printf("Sorted:   ");
+%   printList(sorted);
+
+%   /* delete lists */
+%   deleteList(list);
+%   deleteList(sorted);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}

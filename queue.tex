@@ -1,0 +1,331 @@
+%#!platex kadai2006_3
+\section{発展課題: キュー(待ち行列)の実装}
+
+\subsection{実装の仕様}
+\label{sec:QueueSpecification}
+
+\begin{itemize}
+\item 内部構造として連結リストを用いる。
+\item 先週作成したリスト操作ライブラリをできる限り活用する。
+\item キューの先頭を連結リストの先頭とするか末尾とするかは各自で決めてよ
+      い。
+\item 扱うデータは \texttt{int} 型のデータとする。
+\item 操作関数は、キューの新規作成（MAKENULL）、先頭データの取得
+ （FRONT）、先頭データの取り出し（DEQUEUE）、データの新規追加（ENQUEUE）、
+  空キューの検査（EMPTY）にキュー全体の削除を加えた計 6 関数から構成す
+  る。
+\end{itemize}
+
+また、実使用時に利用しやすいように、構造体宣言、関数のプロトタイプ宣言
+等はヘッダファイル（例えば \verb-queue.h-）に、操作関数群と操作プログ
+ラムは別ファイル（例えば \verb-queue.c- と \verb+queue-test.c+）とし、
+コンパイルには \texttt{make} を用いるようにすること。
+
+なお、前回作成したリスト操作ライブラリを利用することから、今回の課題に
+おいて構造体メンバへの直接アクセスは不要となるはずである。
+課題回答中にこのような操作が必要となった場合には、リスト操作関数のいず
+れかで代用できるはずであるので、その点を考慮すること。
+
+\begin{exercise}
+  空キューを作成してそのポインタ（ダミーセルへのポインタ）を返す関数
+  \begin{quote}
+   \verb-struct cell *makeNullQueue(void);-
+  \end{quote}
+ を作成せよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 Q1】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Make null queue and return pointer to queue
+%  */
+% struct cell *makeNullQueue(void)
+% {
+%   return makeNullList();  /* call makeNullList() */
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  指定されたキューが空（1）か否（0）かを返す関数 \texttt{emptyQueue}
+  を作成せよ。
+  プロトタイプ宣言は次のとおりとする。
+ \begin{quote}
+  \verb-int emptyQueue(struct cell*);-
+ \end{quote}
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 Q2】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Test the queue is empty or not
+%  */
+% int emptyQueue(struct cell *queue)
+% {
+%   if (firstCell(queue) == (struct cell*)NULL) {
+%     return 1;
+%   } else {
+%     return 0;
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  引数として指定されたキューの先頭データを返す関数 \texttt{frontQueue}
+  を作成せよ。
+  プロトタイプ宣言は次のとおりとする。
+
+ \begin{quote}
+  \verb-int frontQueue(struct cell*);-
+ \end{quote}
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 Q3】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Return data of the front queue
+%  */
+% int frontQueue(struct cell *queue)
+% {
+%   /* get data of first cell */
+%   return retrieveCell(firstCell(queue), queue);
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  引数として指定されたキューの先頭データを返し、そのセルを取り除く関数
+  \texttt{dequeue} を作成せよ。
+  プロトタイプ宣言は次のとおりとする。
+
+ \begin{quote}
+  \verb-int dequeue(struct cell*);-
+ \end{quote}
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 Q4】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Dequeue from queue and return the data
+%  */
+% int dequeue(struct cell *queue)
+% {
+%   int data = 0;  /* queued data (initially 0) */
+
+
+%   /* do when queue is not empty */
+%   if (emptyQueue(queue) == 0) {
+%     /* get data of the front queue */
+%     data = retrieveCell(firstCell(queue), queue);
+%     /* delete cell */
+%     deleteCell(firstCell(queue), queue);
+%   }
+
+%   return data;
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として与えられたデータをキューに追加する関数 \texttt{enqueue} を
+  作成せよ。
+  プロトタイプ宣言は次のとおりとする。
+
+\begin{quote}
+  \verb-void enqueue(int, struct cell*);-
+\end{quote}
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 Q5】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Queue up a data to queue
+%  */
+% void enqueue(int data, struct cell *queue)
+% {
+%   insertCell(data, (struct cell*)NULL, queue);  /* insert a data to tail */
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  引数として指定されたキューに残っているすべてのセルを削除し、キューの
+  ダミーセルまでも削除する関数
+\begin{quote}
+  \verb-void deleleteQueue(struct cell*);-
+\end{quote}
+  を作成せよ。
+\end{exercise}
+
+\begin{exercise}
+ ここまでに作成したキュー操作関数群の動作を確認するような
+ \texttt{main()}関数を作成し、動作を確かめよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 Q6】}
+% \begin{verbatim}
+% /*
+%  *  Delete queue
+%  */
+% void deleteQueue(struct cell *queue)
+% {
+%   deleteList(queue);  /* call deleteList() */
+% }
+% \end{verbatim}
+% \end{screen}
+
+% 作成したキュー操作関数群を利用したプログラムの例を示す。 
+
+% \begin{screen}
+%   \noindent\textbf{【プログラム例】}
+%   \small
+% \begin{verbatim}
+% #include <stdio.h>
+% #include "list.h"
+% #include "queue.h"
+
+% int main(void)
+% {
+%   struct cell *queue;
+%   int n = 20;  /* 学籍番号の下二桁に変更のこと */
+
+%   queue = makeNullQueue();
+
+%   enqueue(10, queue);
+%   printf("front: %d\n", frontQueue(queue));
+%   enqueue(n, queue);
+%   printf("front: %d\n", frontQueue(queue));
+%   enqueue(30, queue);
+%   printf("front: %d\n", frontQueue(queue));
+
+%   printf("dequeue: %d\n", dequeue(queue));
+
+%   printf("empty?: %d\n", emptyQueue(queue));
+%   printf("dequeue: %d\n", dequeue(queue));
+
+%   printf("empty?: %d\n", emptyQueue(queue));
+%   printf("dequeue: %d\n", dequeue(queue));
+
+%   printf("empty?: %d\n", emptyQueue(queue));
+
+%   deleteQueue(queue);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【実行例】}
+
+%   ※プログラムによっては結果はこのとおりにならない場合があります。
+%   \small
+% \begin{verbatim}
+% front: 10
+% front: 10
+% front: 10
+% dequeue: 10
+% empty?: 0
+% dequeue: 20
+% empty?: 0
+% dequeue: 30
+% empty?: 1
+% \end{verbatim}
+% \end{screen}
+
+
+% % \section*{関数プロトタイプ}
+% % \label{QueuePrototype}
+
+% % \begin{screen}
+% %   \small
+% % \begin{verbatim}
+% % #include "list.h"
+
+% % struct cell *makeNullQueue(void);                /* returns queue */
+% % int frontQueue(struct cell *queue);            /* returns iData   */
+% % void enqueue(int iData, struct cell *queue);   /* no return       */
+% % int dequeue(struct cell *queue);               /* returns iData   */
+% % int emptyQueue(struct cell *queue);            /* returns 1 or 0  */
+% % void deleteQueue(struct cell *queue);          /* no return       */
+% % \end{verbatim}
+% % \end{screen}
+
+\section{発展課題: 配列によるスタック・キューの実装}
+
+\begin{exercise}
+ 配列を用いたスタック操作関数群を作成せよ。
+
+  各操作関数のプロトタイプは下記の通りとする。
+
+\begin{quote}
+  \verb-struct array_stack *makeNullStack(void);- \\
+  \verb-int emptyStack(struct array_stack*);- \\
+  \verb-int topStack(struct array_stack*);- \\
+  \verb-int popStack(struct array_stack*);- \\
+  \verb-void pushStack(int, struct array_stack*);- \\
+  \verb-void deleteStack(struct array_stack*);-
+\end{quote}
+
+  また、構造体 \verb-struct array_stack- は下記を用いることとする。
+
+\begin{verbatim}
+#define MAX_STACK_SIZE 10
+struct array_stack {
+  int length;                    /* スタックの長さ (格納数) */
+  int elements[MAX_STACK_SIZE];  /* データを格納するための配列 */
+};
+\end{verbatim}
+
+スタックに格納するデータは \verb-int- 型に限定する。
+また、格納位置が 0 のものをスタックの底とする。
+なお、\verb-MAX_STACK_SIZE- を越えてデータを格納しようとした場合にはエ
+ラーメッセージを出し、その操作を無効とすること。
+\end{exercise}
+
+\begin{exercise}
+  配列を用いたキュー操作関数群を作成せよ。
+
+  各操作関数のプロトタイプは下記の通りとする。
+
+\begin{quote}
+  \verb-struct array_queue *makeNullQueue(void);- \\
+  \verb-int emptyQueue(struct array_queue*);- \\
+  \verb-int frontQueue(struct array_queue*);- \\
+  \verb-int dequeue(struct array_queue*);- \\
+  \verb-void enqueue(int, struct array_queue*);- \\
+  \verb-void deleteQueue(struct array_queue*);-
+\end{quote}
+
+  また、構造体 \verb-struct array_queue- は下記を用いることとする。
+
+
+\begin{verbatim}
+#define MAX_QUEUE_SIZE 10
+struct array_queue {
+  int front;                     /* キューのフロントを示す配列の添字 */
+  int length;                    /* キューの長さ (格納数) */
+  int elements[MAX_QUEUE_SIZE];  /* データを格納するための配列 */
+};
+\end{verbatim}
+
+キューに格納するデータは \verb-int- 型に限定する。
+また、格納位置が配列の終端（\verb+MAX_QUEUE_SIZE-1+）になった場合には、
+配列の先頭の 0 に折り返すこととし、常に \verb-MAX_QUEUE_SIZE- 個のデー
+タを格納できるようにすること。
+なお、\verb-MAX_QUEUE_SIZE- を越えてデータを格納しようとした場合にはエ
+ラーメッセージを出し、その操作を無効とすること。
+\end{exercise}

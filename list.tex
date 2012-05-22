@@ -1,0 +1,658 @@
+%#!platex kadai2006_02
+
+\section{構造体を指し示すポインタ}
+
+以下の練習問題は、実験レポートに含める必要はない。
+
+\begin{screen}
+  \noindent\textbf{【練習問題 1】} 個人データを保持する構造体として以下の
+ ようなものを作成した(前回の実験を思い出せ)。この宣言に、構造体
+ \verb|personal_data|へのポインタを保持するメンバ\texttt{next} を追加せよ。
+ \begin{quote}
+  \begin{verbatim}
+struct personal_data {
+  char name[256];
+  char phone[16];
+  int number;
+};
+  \end{verbatim}
+ \end{quote}
+\end{screen}
+
+\begin{screen}
+  \noindent\textbf{【練習問題 2】}
+ \verb|struct personal_data| 型の構造体が2つ、メモリ上に置かれており、それらの
+ 先頭番地がそれぞれ\verb|struct personal_data *|型の変数\verb|a, b|に格
+ 納されているものとする。
+ \begin{quote}
+  \begin{verbatim}
+	struct personal_data *a, *b;
+	/* 実際のプログラムでは、malloc() を用いてメモリ領域を動的に確保・
+	初期化し、それらの先頭番地を a, b に代入するという作業が必要であ
+	る。ここでは、すでにこの作業は行われているものとする */
+  \end{verbatim}
+ \end{quote}
+ さて、\texttt{a} (で指し示されている構造体)の次に \texttt{b} (で指し示
+ されている構造体)をつなぎたい。どのようなコードを書けばよいか、示せ。
+\end{screen}
+
+\begin{screen}
+  \noindent\textbf{【練習問題 3】}
+ 練習問題 2 に続き、「\texttt{a}(で指し示される構造体)の次の構造体の氏
+ 名」を\texttt{printf()}で表示させたい。どのようなコードを書けばよいか、
+ 示せ。(変数 \texttt{b} は使用せずに書くこと)
+\end{screen}
+
+\section{課題: 連結リストによる「リスト」の実装}
+
+\subsection{仕様、実装上の注意}
+
+リストは C言語には元々ないデータ構造なので、プログラム中でリストを扱うた
+めには、C言語に用意されているデータ構造で実装を行う必要がある。
+実装方法はいくつかあるが、ここでは、連結リストを採用することとする。
+細かい仕様は以下の通りである。
+
+\begin{itemize}
+ \item リストの各要素に構造体(以下「セル」と呼ぶ)を一つ対応させ、リスト中
+       で並んでいる順にセルをポインタで接続するものとする(テキストの図
+       2.4参照)。
+ \item セルデータは \texttt{int} 型のデータ 1 個だけとする。
+ \item 次の要素が存在しない場合には、対応するセルでは、次のセルへのポイン
+       タを \texttt{NULL} とする。すなわち、次のセルとして \texttt{NULL}
+       を保持するセルは、リストの終端となる。
+ \item 各要素を表すセルの他に、連結リストの先頭にセルを1つ置く(これを以下
+       「ダミーセル」と呼ぶ)。リスト全体をC言語中で指し示す必要がある場合
+       には、ダミーセルへのポインタで代用する。例えば、空リストは、ダミー
+       セル1つだけからなる連結リストで表現される。
+ \item 操作関数は、以下の課題で述べる11個である。各関数の仕様はそれぞれの
+       課題で述べるが、いずれもテキストの図2.1にならったものとしている。
+
+       なお、これらの関数はすべてリスト全体を指し示す引数を持つように統一
+       している。そのため、一部の関数では、引数をすべて使用しなくても実装
+       できることがある。
+ \item この課題で作成した関数群は次回の実験で利用するため、構造体宣言、
+       関数のプロトタイプ宣言等はヘッダファイル（例えば \verb-list.h-）
+       に、操作関数群と操作プログラムは別ファイル（例えば \verb-list.c-
+       と\verb+list-test.c+）とし、コンパイルには \texttt{make} を用いる。
+\end{itemize}
+
+一部の課題では解答例を示している。この解答例では、セルの構造体のメンバと
+して次のセルへのポインタを保持する変数名を \verb-next- と仮定している。も
+ちろん、レポートに添付するプログラムは、この解答例の通りである必要はない。
+
+\subsection{課題}
+
+\begin{exercise}
+  \texttt{int} 型のデータを 1 つ持つ連結リストのセルを表す構造体
+  (\verb-struct cell-) を記述せよ。
+%   ただし、\texttt{typedef} を用いて新しいデータ型の名前を設定すること。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 1】}
+%   \small
+% \begin{verbatim}
+% struct cell {
+%   int data;            /* integer data         */
+%   struct cell *next;   /* pointer to next cell */
+% };
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  空リストを作成する関数
+ \begin{quote}
+  \texttt{struct cell *makeNullList(void);}
+ \end{quote}
+ を作成せよ。返り値は、ダミーセルへのポインタである。
+
+ ダミーセルは\texttt{malloc} を用いて動的に領域を確保すること。また、動的
+ 確保が成功したかどうかを必ず確認し、失敗した場合にはその旨を表示してプロ
+ グラムを終了させるようにすること\footnote{メモリの動的確保に失敗するのは、
+ 異常に重いプログラムが実行されているなど、コンピュータ上でのプログラムの
+ 実行に重大な問題が発生している場合が多い。}。また、ダミーセルの次のセル
+ へのポインタの初期値は \texttt{NULL} とし, 次がないことを表しておく。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+/*
+ *  Make null list and return pointer to list.
+ */
+struct cell *makeNullList(void)
+{
+  struct cell *list;  /* pointer to new list */
+
+  /* allocate memory for new list entry */
+  list = (struct cell*)malloc(sizeof(struct cell));
+  /* check the allocation succeeded or failed */
+  if (list == (struct cell*)NULL) {
+    fprintf(stderr, "makeNullList: can not allocate memory for new list.\n");
+    exit(1);
+  }
+
+  /* set next cell's position to NULL */
+  list->next = (struct cell*)NULL;
+
+  return list;  /* return pointer to list */
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  指定されたセルの次のセルへのポインタを返す関数 \texttt{nextCell} を
+  作成せよ。
+ \begin{quote}
+  \verb-struct cell *nextCell(struct cell *, struct cell *);-
+ \end{quote}
+  第1引数は指定するセルへのポインタである。また、第2引数は対象となるリス
+ ト全体を表す。すなわち、操作対象としている連結リストのダミーセルへのポ
+ インタである。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \footnote{仕様上はリストへのポインタを引数としてとるが、この解答例で
+  はこの引数を利用していない。}
+  \small
+\begin{verbatim}
+/*
+ *  Return pointer to the next cell.
+ */
+struct cell *nextCell(struct cell *target, struct cell *list)
+{
+  struct cell *next = (struct cell*)NULL;
+
+
+  if (target != (struct cell*)NULL) {
+    next = target->next;
+  }
+
+  return next;
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  連結リストの先頭のセル、終端のセルへのポインタを返す関数
+ \begin{quote}
+  \texttt{struct cell *firstCell(struct cell *);} \\
+  \texttt{struct cell *endCell(struct cell *);}
+ \end{quote}
+ を作成せよ。いずれの関数もダミーセルへのポインタを引数とする。連結リス
+ トが空リストを表している場合には、いずれの関数も \texttt{NULL} を返すも
+ のとする。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 4-1】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Return position of first cell in the list.
+%  */
+% struct cell *firstCell(struct cell *list)
+% {
+%   return list->next;  /* return pointer to first cell */
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 4-2】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Return position of the next of the end cell in the list.
+%  */
+% struct cell *endCell(struct cell *list)
+% {
+%   struct cell *current;  /* current cell's pointer */
+
+
+%   /* set pointer to current cell as pointer to first cell */
+%   current = firstCell(list);
+
+%   /* if the list is not null list */
+%   if (current != (struct cell*)NULL) {
+%     /* while the next cell is not NULL, pursue the next cell */
+%     while ((current != (struct cell*)NULL)
+%          && (nextCell(list, current) != (struct cell*)NULL)) {
+%       current = nextCell(list, current);
+%     }
+%   }
+
+%   return current;  /* return pointer of end cell */
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  指定されたセルの前のセルへのポインタを返す関数 \texttt{previousCell} を
+  作成せよ\footnote{本課題の仕様では、セルは直前のセルを示すポインタを保
+  持していないため、先頭のセルから順にたどる必要がある。} 。
+ \begin{quote}
+  \verb-struct cell *previousCell(struct cell*, struct cell*);-
+ \end{quote}
+  第1引数は指定するセルへのポインタ、第2引数は対象となる連結リストのダミー
+ セルへのポインタである。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 5】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Return pointer to the previous cell.
+%  *  If the list is null list, return end cell.
+%  */
+% struct cell *previousCell(struct cell *position, struct cell *list)
+% {
+%   struct cell *current;  /* current cell's pointer */
+
+
+%   if (position != firstCell(list)) {
+%     /* set pointer to current cell as pointer to first cell */
+%     current = firstCell(list);
+%
+%     /* while pointer to next cell of current cell is not position,
+%        pursue the next cell */
+%     while ((current != (struct cell*)NULL)
+%          && (nextCell(current, list) != position)) {
+%       current = nextCell(current, list);
+%     }
+
+%     return current;  /* return end cell's pointer */
+%   } else {
+%     return (struct cell*)NULL;  /* return NULL */
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  新たにセルを作成し、指定された位置に挿入する関数 \texttt{insertCell} を
+  作成せよ。
+ \begin{quote}
+  \verb-struct cell *insertCell(int, struct cell *, struct cell *);-
+ \end{quote}
+  第1引数はデータの値、第2引数は挿入位置となるセルへのポインタ、第3引数は
+  対象となる連結リストのダミーセルへのポインタである。新たに作成されたセ
+  ルは、第2引数のセルの前に挿入することとする。関数の返り値は、挿入したセ
+  ルへのポインタである。
+
+  連結リストの最後尾にセルを追加するときは、位置(第2引数)として
+  \texttt{NULL} を指定する\footnote{\texttt{nextCell(endCell(list),
+  list)}が\texttt{NULL}であるため。}。また、新規に作成するセルの格納領域
+  は\texttt{malloc} を用いて動的に確保する。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 5】}
+%   \small
+% \begin{verbatim}
+% \end{verbatim}
+% /*
+%  *  Insert a cell has data equals to specified as data before position,
+%  *  and return pointer to inserted cell.
+%  */
+% struct cell *insertCell(int data, struct cell *position, struct cell *list)
+% {
+%   struct cell *insert;  /* pointer to newly insert cell */
+%   struct cell *previous;  /* pointer to the previous cell */
+
+
+%   /* allocate memory for newly insert cell */
+%   insert = (struct cell*)malloc(sizeof(struct cell));
+%   /* check the allocation succeeded or failed */
+%   if (insert == (struct cell*)NULL) {
+%     fprintf(stderr, "insertCell: can not allocate memory for new cell.\n");
+%     return (struct cell*)NULL;
+%   }
+
+%   if (position != firstCell(list)) {
+%     /* if position is not first cell, get pointer of the previous cell */
+%     previous = previousCell(position, list);
+%   } else {
+%     /* if position is first cell, set previous as list */
+%     previous = list;
+%   }
+
+%   /* reconnect pointers */
+%   insert->next = nextCell(previous, list);
+%   previous->next = insert;
+
+%   /* set data of the insert cell */
+%   insert->data = data;
+
+%   return insert;  /* return pointer to inserted cell */
+% }
+% \end{screen}
+
+
+\begin{exercise}
+  指定されたセルを指定されたリストから削除する関数 \texttt{deleteCell}
+  を作成せよ。削除したセルのメモリは解放すること。
+ \begin{quote}
+  \verb-struct cell *deleteCell(struct cell*, struct cell*);-
+ \end{quote}
+  第1引数は指定するセルへのポインタ、第2引数は対象となる連結リストのダミー
+ セルへのポインタである。返り値は、削除されたセルの次に位置していたセル
+ へのポインタである。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 7】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Delete cell, and return pointer to next cell of deleted cell.
+%  */
+% struct cell *deleteCell(struct cell *position, struct cell *list)
+% {
+%   struct cell *previous;  /* pointer to the previous cell */
+
+
+%   if (position != firstCell(list)) {
+%     /* if position is not first cell, get pointer of the previous cell */
+%     previous = previousCell(position, list);
+%   } else {
+%     /* if position is first cell, set previous as list */
+%     previous = list;
+%   }
+
+%   /* reconnect pointer */
+%   previous->next = nextCell(position, list);
+
+%   /* free memory of position */
+%   free(position);
+
+%   return nextCell(previous, list);
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  指定されたセルのデータを返す関数 \texttt{retrieveCell} を作成せよ。
+  ただし、指定されたポインタが \texttt{NULL} であった場合には,
+  \texttt{0} を返すこととする。
+\begin{quote}
+  \verb-int retrieveCell(struct cell*, struct cell*);-
+\end{quote}
+  第1引数はデータを取得したいセルへのポインタ、第2引数は対象となる連結リ
+ ストのダミーセルへのポインタである。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 8】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Return data of the cell.
+%  */
+% int retrieveCell(struct cell *position, struct cell *list)
+% {
+%   if (position != (struct cell*)NULL) {
+%     return position->data;
+%   } else {
+%     return 0;
+%   }
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  指定されたデータを値として持つセルへのポインタを返す関数
+  \texttt{locateCell} を作成せよ。
+  ただし、該当するセルがない場合には \texttt{NULL} を返すこと。
+  また、同じ値をもつセルが複数ある場合にはそのうちのいずれか 1 つのみを
+  返すものとする。
+ \begin{quote}
+  \verb-struct cell *locateCell(int, struct cell*);-
+ \end{quote}
+  第1引数は指定するデータの値、第2引数は対象となる連結リストのダミーセル
+  へのポインタである。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+/*
+ *  return position of the cell has data equals to specified as iData
+ */
+struct cell *locateCell(int data, struct cell *list)
+{
+  struct cell *current;  /* current cell's pointer */
+
+
+  /* set pointer to current cell as pointer to first cell */
+  current = firstCell(list);
+
+  /* while current cell's data is not data, pursue the next cell */
+  while ((current != (struct cell*)NULL)
+       && (retrieveCell(current, list) != data)) {
+    current = nextCell(current, list);
+  }
+
+  return current;  /* return end cell's pointer */
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  先に作成した関数 \texttt{deleteCell} を用いて、指定された連結リスト中の
+  すべてのセルを削除する関数 \texttt{deleteList} を作成せよ。ダミーセル
+ も含めて削除すること。
+\begin{quote}
+  \verb-void deleteList(struct cell*);-
+\end{quote} 
+  第1引数は対象となる連結リストのダミーセルへのポインタである。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 10】}
+% \begin{verbatim}
+% /*
+%  *  Delete all cells in the list and delete the list.
+%  */
+% void deleteList(struct cell *list)
+% {
+%   struct cell *current;  /* current cell's pointer */
+
+
+%   /* set pointer to current cell as pointer to first cell */
+%   current = firstCell(list);
+
+%   /* while current is not NULL, pursue the next cell */
+%   while (current != (struct cell*)NULL) {
+%     /* delete first cell */
+%     deleteCell(current, list);
+%     /* set pointer to current cell as pointer to first cell */
+%     current = firstCell(list);
+%   }
+
+%   /* free memory of list entry */
+%   free(list);
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+  指定されたリストの内容を表示する関数 \texttt{printList} を作成せよ。
+  ただし、表示はリストの先頭から順に \texttt{[ 1, 2, 3, 4, 5 ]} の形で
+  表示することとする。
+ \begin{quote}
+  \verb-void printList(struct cell*);-
+ \end{quote}
+  第1引数は対象となる連結リストのダミーセルへのポインタである。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 11】}
+%   \small
+% \begin{verbatim}
+% /*
+%  *  Print all cells' data in the list.
+%  */
+% void printList(struct cell *list)
+% {
+%   struct cell *current;  /* current cell's pointer */
+
+
+%   /* set pointer to current cell as pointer to first cell */
+%   current = firstCell(list);
+
+%   putchar('[');
+
+%   /* while next cell exist, pursue the next cell */
+%   while (current != (struct cell*)NULL) {
+%     /* print data of current cell */
+%     printf(" %d", retrieveCell(current, list));
+
+%     /* if next cell is exist, print comma */
+%     if (nextCell(current, list) != (struct cell*)NULL) {
+%       putchar(',');
+%     }
+
+%     /* pursue the next cell */
+%     current = nextCell(current, list);
+%   }
+
+%   printf(" ]\n");
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+ 実装を行った連結リスト操作関数群を用いて連結リストを操作する
+ \texttt{main()}を実装せよ。連結リスト操作関数群が正しく動作していること
+ が確かめられるように、基本関数群の使い方を工夫すること。
+\end{exercise}
+
+
+% 作成したリスト操作関数群を利用したプログラムの例を示す。
+% これにこだわらず、作成した連結リスト基本操作関数群をテスト
+% なお、学生番号の下二桁を変数 \texttt{n} に代入するようになっているので、
+% プログラム中に \texttt{??} としている個所を必ずそれぞれの番号に置き替
+% えること。
+
+% \begin{screen}
+%   \noindent\textbf{【プログラム例】}
+%   \scriptsize
+% \begin{verbatim}
+% #include "list.h"
+
+% int main()
+% {
+%   struct cell *pcList;  /* pointer to list */
+%   int n = ??;  /* 学籍番号の下二桁に変更のこと */
+
+%   /* create new list */
+%   list = makeNullList();
+%   printList(list);
+%   /* insert new cell has a value 20 before first cell (currently null) */
+%   insertCell(20, firstCell(list), list);
+%   printList(list);
+%   /* insert new cell has a value n before 20 valued cell */
+%   insertCell(n, locateCell(20, list), list);
+%   printList(list);
+%   /* insert new cell has a value 10 as end cell */
+%   insertCell(10, nextCell(endCell(list), list), list);
+%   printList(list);
+%   /* insert new cell has a value 30 before 20 valued cell */
+%   insertCell(30, locateCell(20, list), list);
+%   printList(list);
+%   /* insert new cell has a value 50 before first cell */
+%   insertCell(50, firstCell(list), list);
+%   printList(list);
+%   /* delete first cell (50 valued cell) */
+%   deleteCell(firstCell(list), list);
+%   printList(list);
+%   /* delete 20 valued cell */
+%   deleteCell(locateCell(20, list), list);
+%   printList(list);
+%   /* delete n valued cell */
+%   deleteCell(locateCell(n, list), list);
+%   printList(list);
+%   /* insert 35 valued cell before 30 valued cell */
+%   insertCell(35, locateCell(30, list), list);
+%   printList(list);
+%   /* delete previous of end cell (30 valued cell) */
+%   deleteCell(previousCell(endCell(list), list), list);
+%   printList(list);
+%   /* delete end cell (10 valued cell) */
+%   deleteCell(endCell(list), list);
+%   printList(list);
+%   /* delete list */
+%   deleteList(list);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【実行例】}
+
+%   ※学籍番号（この実行例では \texttt{??} で示しています）がそれぞれ異
+%   なるため、結果がこのとおりにならない人もあります。
+%   \scriptsize
+% \begin{verbatim}
+% [ ]
+% [ 20 ]
+% [ ??, 20 ]
+% [ ??, 20, 10 ]
+% [ ??, 30, 20, 10 ]
+% [ 50, ??, 30, 20, 10 ]
+% [ ??, 30, 20, 10 ]
+% [ ??, 30, 10 ]
+% [ 30, 10 ]
+% [ 35, 30, 10 ]
+% [ 35, 10 ]
+% [ 35 ]
+% \end{verbatim}
+% \end{screen}
+
+% % \section*{関数プロトタイプ}
+% % \label{Prototype}
+
+% % \begin{screen}
+% %   \small
+% % \begin{verbatim}
+% % /* return pcList */
+% % struct cell *MakeNullList(void);
+
+% % void DeleteList(struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *NextCell(struct cell *pcCell, struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *PreviousCell(struct cell *pcCell, struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *InsertCell(int iData, struct cell *pcCell, struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *DeleteCell(struct cell *pcCell, struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *FirstCell(struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *EndCell(struct cell *pcList);
+
+% % /* return pcCell */
+% % struct cell *LocateCell(int iData, struct cell *pcList);
+
+% % /* return iData */
+% % int RetrieveCell(struct cell *pcCell, struct cell *pcList);
+
+% % void PrintList(struct cell *pcList);
+% % \end{verbatim}
+% % \end{screen}

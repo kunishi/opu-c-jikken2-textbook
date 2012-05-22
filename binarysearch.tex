@@ -1,0 +1,279 @@
+%#!platex kadai2006_05
+
+\section{二分探索木}
+
+\subsection{実装上の注意}
+\label{sec:Specification}
+
+二分探索木はその内部構造が二分木であるため、前回作成した二分木の操作関
+数群をそのまま使用することとする。
+
+また、二分木を内部構造とすることから分かるように、課題のほとんどは再帰
+処理によって実現されるものであることに注意すること。
+
+なお、本課題中の解答例として、作成する関数の雛形を示しているが、この中
+の日本語のコメントの部分は各自でそれに相当する処理を記述する必要がある
+部分である。
+
+
+\subsection{課題}
+\label{sec:BS_Member}
+
+\begin{exercise}
+  引数として参照データと二分探索木の根へのポインタをとり、参照データが
+  二分探索木に含まれているかどうかを返す関数
+ \begin{quote}
+  \texttt{int BS\_member(int, struct node*);}
+ \end{quote}
+  を作成せよ。
+  返り値は、参照データが含まれている場合には \texttt{1}、含まれていな
+  い場合には \texttt{0} を返すこととする。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+/***
+ ***  test that a node that has specified label is in the tree
+ ***/
+int BS_member(int data, struct node *tree)
+{
+  int ret = 0;  /* result (0: not member, 1: member) */
+
+  if (tree != (struct node*)NULL) {
+    /* 節点 tree が存在する場合の処理
+       存在しない場合にはデータ data も存在しない */
+  }
+
+  return ret;
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  引数として追加するデータと二分探索木の根へのポインタをとり、追加後の
+  二分探索木の根へのポインタを返す関数
+ \begin{quote}
+  \texttt{struct node *BS\_insert(int, struct node*);}
+ \end{quote}
+  を作成せよ。
+  なお、新規の二分探索木作成にもこの関数を使用するため、その点も考慮す
+  ること\footnote{具体的には、根へのポインタが \texttt{NULL} の場合に
+  は二分探索木の新規作成と見なして処理を行うようにする。}。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+/***
+ ***  insert a node that has specified label
+ ***/
+struct node *BS_insert(int data, struct node *tree)
+{
+  if (tree == (struct node*)NULL) {
+    /* 節点 tree が存在しない場合（新規に二分探索木を作成する場合）の処理 */
+  } else {
+    /* 節点 tree が存在する場合の処理 */
+  }
+
+  return tree;
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  引数として二分探索木の根へのポインタをとり、最小のデータを保持する節
+  点へのポインタを返す関数
+ \begin{quote}
+  \texttt{struct node *BS\_min(struct node*);}
+ \end{quote}
+  を作成せよ。
+\end{exercise}
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+/***
+ ***  get a node that has minimum label in the tree
+ ***/
+struct node *BS_min(struct node *tree)
+{
+  struct node *min = (struct node*)NULL;  /* pointer to minimum node (initially NULL) */
+
+  if (tree != (struct node*)NULL) {  /* check tree is exist or not */
+    if (leftNode(tree) == (struct node*)NULL) {
+      /* 節点 tree が左部分木を持っていない場合の処理 */
+    } else {
+      /* 節点 tree が左部分木を持っている場合の処理 */
+    }
+  }
+
+  return min;
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  引数として削除データの値と二分探索木の根へのポインタをとり、削除後の
+  二分探索木の根へのポインタを返す関数
+ \begin{quote}
+  \texttt{struct node *BS\_delete(int, struct node*);}
+ \end{quote}
+  を作成せよ。
+\end{exercise}
+
+
+\begin{screen}
+  \noindent\textbf{【解答例】}
+  \scriptsize
+\begin{verbatim}
+/***
+ ***  delete a node that has a label equals to specified label
+ ***/
+struct node *BS_delete(int data, struct node *tree)
+{
+  int tmp;  /* temporary data */
+
+  if (tree != (struct node*)NULL) {  /* check tree is exist or not */
+    if (labelNode(tree) > data) {
+      /* データ data が節点 tree のデータより小さい場合の処理 */
+    } else if (labelNode(tree) < data) {
+      /* データ data が節点 tree のデータより大きい場合の処理 */
+    } else {
+      /* data is equal to this node, then delete this node */
+      if ((leftNode(tree) == (struct node*)NULL)
+          && (rightNode(tree) == (struct node*)NULL)) {
+        /* 節点 tree が葉である場合の処理 */
+      } else if (leftNode(tree) == (struct node*)NULL) {
+        /* 節点 tree が右部分木しか持っていない場合の処理 */
+      } else if (rightNode(tree) == (struct node*)NULL) {
+        /* 節点 tree が左部分木しか持っていない場合の処理 */
+      } else {
+        /* 節点 tree が左右の部分木を持っている場合の処理 */
+      }
+    }
+  }
+
+  return tree;
+}
+\end{verbatim}
+\end{screen}
+
+\begin{exercise}
+  引数として二分探索木の根へのポインタをとり、格納しているデータ全てを
+  昇順に表示する関数
+ \begin{quote}
+  \texttt{void BS\_print(struct node*);}
+ \end{quote}
+  を作成せよ。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 5】}
+%   \scriptsize
+% \begin{verbatim}
+% /***
+%  ***  print binary tree contents in sorted order
+%  ***/
+% void BS_print(struct node *tree)
+% {
+%   inOrder(tree);
+% }
+% \end{verbatim}
+% \end{screen}
+
+
+\begin{exercise}
+  引数として二分探索木の根へのポインタをとり、その二分探索木の全ての節
+  点を削除する関数
+ \begin{quote}
+  \texttt{void BS\_destroy(struct node*);}
+ \end{quote}
+  を作成せよ。
+\end{exercise}
+
+
+% \begin{screen}
+%   \noindent\textbf{【解答例 6】}
+%   \scriptsize
+% \begin{verbatim}
+% /***
+%  ***  Delete all nodes in the tree
+%  ***/
+% void BS_destroy(struct node *tree)
+% {
+%   deleteTree(tree);
+% }
+% \end{verbatim}
+% \end{screen}
+
+\begin{exercise}
+ 以上の課題で実装した関数の動作を確かめるような\texttt{main()}関数を実装
+ し、動作を確かめよ。
+\end{exercise}
+
+% \begin{screen}
+%   \noindent\textbf{【プログラム例】}
+%   \scriptsize
+% \begin{verbatim}
+% int main(int argc, char *argv[])
+% {
+%   struct node *tree = (struct node*)NULL;  /* pointer to root node of tree */
+
+%   tree = BS_insert(5, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_insert(4, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_insert(7, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_insert(1, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_insert(6, tree);
+%   BS_print(tree); putchar('\n');
+
+%   printf("BS_member(9) = %d\n", BS_member(9, tree));
+%   printf("BS_member(4) = %d\n", BS_member(4, tree));
+
+%   tree = BS_delete(4, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_delete(5, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_insert(4, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_delete(7, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_delete(9, tree);
+%   BS_print(tree); putchar('\n');
+%   tree = BS_delete(6, tree);
+%   BS_print(tree); putchar('\n');
+
+%   BS_destroy(tree);
+
+%   return 0;
+% }
+% \end{verbatim}
+% \end{screen}
+
+% \begin{screen}
+%   \noindent\textbf{【実行例】}
+%   \scriptsize
+% \begin{verbatim}
+% 5, 
+% 4, 5, 
+% 4, 5, 7, 
+% 1, 4, 5, 7, 
+% 1, 4, 5, 6, 7, 
+% BS_member(9) = 0
+% BS_member(4) = 1
+% 1, 5, 6, 7, 
+% 1, 6, 7, 
+% 1, 4, 6, 7, 
+% 1, 4, 6, 
+% 1, 4, 6, 
+% 1, 4, 
+% \end{verbatim}
+% \end{screen}

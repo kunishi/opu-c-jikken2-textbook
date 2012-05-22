@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='iso-2022-jp'?>
+<doc xml:lang="ja" encoding="iso-2022-jp">
+<head>
+<title>情報通信工学実験A(情報系実験)テキスト</title>
+<author>担当: 国島丈生、山内仁</author>
+<date>2001-10-31</date>
+</head>
+<body>
+<section title="再帰(recursion)">
+<subsection title="定義">
+関数fが、その関数本体の中にf自身の適用を含むとき、関数fを再帰関数
+(recursive function)であるという。一般的には、fから直接的にfが呼び出さ
+れる場合だけではなく、間接的に呼び出される場合も再帰関数という。
+
+とくに、関数fの中で直接的にたかだか1回しかfを呼び出さない場合を線形再
+帰(linear recursive)、2回以上のfの呼び出しを含む場合を非線型再帰
+(non-linear recursive)という。
+
+再帰関数には必ず以下の2つの部分が含まれる。
+<ol>
+<li>基底…再帰を含まない計算</li>
+<li>帰納段階…再帰を含む計算</li>
+</ol>
+
+再帰関数は、リストや次回以降に扱う木など、再帰的なデータ構造<note>フラ
+クタルなども再帰的な構造を持っていると言える。</note>を扱うアルゴリズ
+ムにおいて特に強力な計算手段であることが知られている。
+</subsection>
+<subsection title="再帰関数の例">
+ここでは、「計算機言語I」で用いている ML によって再帰関数の例を示す。
+<subsubsection title="階乗計算">
+自然数nの階乗は以下のアルゴリズムで計算できる。
+<ul>
+<li>n=0 のとき、1</li>
+<li>n ≧ 1 のとき n * (n-1)!</li>
+</ul>
+これをMLで書いた例を次に示す。
+<program>
+fun factorial(n) =
+    if n = 0 then 1 else n * factorial(n-1);
+</program>
+</subsubsection>
+<subsubsection title="リストの逆順並び替え">
+リストLを逆順に並び替える操作は以下のアルゴリズムで計算できる。
+<ul>
+<li>Lが空リストのとき、結果は空リストである。</li>
+<li>Lが空リストでないとき、tl(L)を逆順に並び替えたリストの後ろに、
+hd(L)だけからなるリストを連接したものになる。ただし、hd(L), tl(L) はそ
+れぞれ L の頭部、尾部を表す。</li>
+</ul>
+これをMLで実装すると次のようになる。
+<program>
+fun reverse(L) =
+    if L = nil then nil
+               else reverse(tl(L) @ [hd(L)];
+</program>
+</subsubsection>
+</subsection>
+<subsection title="再帰関数の実装上の注意">
+再帰関数を実装する場合、いくつか決まった方針がある。
+<ul>
+<li>基底、帰納部分を必ず両方とも作り、引数の値などによって条件分岐させ
+る。たとえば整数を引数に取る関数の場合は 0 (または 1)かどうかで、リス
+トを引数に取る関数の場合は nil かどうかでそれぞれ条件分岐させることが
+ひじょうに多い。</li>
+<li>帰納部分での再帰呼び出しでは、かならず引数の値を小さくして呼び出す
+ようにする。たとえば整数の場合は n-1、リストの場合は tl(L) などとする。
+これと、上記の条件分岐によって、再帰関数はいつか必ず基底の計算を行う
+(無限に帰納部分を繰り返すことはない)ことが保証される。すなわち、いつか
+必ず計算が停止することが保証される。</li>
+</ul>
+</subsection>
+</section>
+</body>
+</doc>

@@ -1,0 +1,195 @@
+\documentclass[a4j]{jsarticle}
+\title{デバッグの手間を減らす: ``printf~デバッグ'' と GDB の使い方}
+\author{小野孝男}
+\usepackage{listings}
+\usepackage{jlisting}
+\lstset{language=C, frame=tblr, columns=fullflexible, numbers=left,
+numberstyle=\tiny, basicstyle=\small\ttfamily}
+\def\lstlistingname{リスト}
+\newcommand{\includelist}[2]{\par{\renewcommand{\baselinestretch}{0.8}%
+\lstinputlisting[label={lst:#1},
+caption={#2}]{#1}}\par}
+\addtolength{\textheight}{5truemm}
+\usepackage{okumacro}
+\usepackage{alltt}
+\let\Filename=\texttt
+\newenvironment{consoleinput}{\begin{screen}\renewcommand{\baselinestretch}{0.9}\begin{alltt}}{\end{alltt}\end{screen}}
+\begin{document}
+\maketitle
+
+リスト~\ref{lst:target.c} のプログラム~\Filename{target.c} を使い, デバッ
+グ手法としての ``\lstinline|printf|~デバッグ'' と ``デバッガ~GDB の簡単
+な使い方'' を説明する.
+
+\includelist{target.c}{対象とするプログラム~\Filename{target.c}}
+
+\section{まずコンパイルと実行}
+このプログラムを普通にコンパイルして実行すると
+\begin{consoleinput}
+> gcc -o target target.c
+> ./target
+heLlo
+Segmentation fault
+\end{consoleinput}
+となる. ここで, 最後に ``Segmentation fault'' とあるように, このプログ
+ラムにはバグがある. どこがおかしいかを調べるため ``\lstinline|printf|~%
+デバッグ'' を行ったり GDB を使ったりする.
+
+\section{printf~デバッグ}
+\lstinline|printf|~デバッグとは, ``プログラム中に \lstinline|printf| %
+を埋め込んで表示させる手法'' である. つまり, 実行されているかどうかあ
+やしいところに \lstinline|printf| を入れておき, どこまで表示されるかを
+見ることによって ``停止したところ'' を見付ける手法である. また, 同時に
+``あやしい変数'' の値を表示させるころもできる.
+
+今の例では $13$~行目や $15$~行目に \lstinline|printf| を入れればきちん
+と表示されるが, $17$~行目に入れると \lstinline|printf| は実行されない.
+つまり ``$16$~行目があやしい'' とあたりをつけることができる.
+
+なお, \lstinline|printf|~デバッグでは確実に出力させるため
+\begin{lstlisting}[numbers=none]
+printf(表示内容); fflush(stdout);
+\end{lstlisting}
+のように関数~\lstinline|fflush| を実行するか, あるいは
+\begin{lstlisting}[numbers=none]
+fprintf(stderr, 表示内容);
+\end{lstlisting}
+のように \lstinline|stderr| に出力する.
+
+\section{GDB によるデバッグ}
+\subsection{GDB でデバッグするためにコンパイル}
+GDB でデバッグするためには \texttt{-g}~オプションを付けてコンパイルす
+る. このオプションはプログラムの動作とは無関係なので, もちろんこのオプ
+ションを付けてコンパイルしてもエラーは出る:
+\begin{consoleinput}
+> gcc -g -o target target.c
+> ./target
+heLlo
+Segmentation fault
+\end{consoleinput}
+
+\subsection{GDB の起動}
+ここで, デバッグ対象となるプログラムを指定して GDB を起動する:
+\begin{consoleinput}
+> gdb ./target
+(ライセンス文章など)
+(gdb)
+\end{consoleinput}
+\texttt{(gdb)} が GDB のプロンプトである. この状態で GDB にコマンドを
+入力することができる.
+
+\subsection{GDB~管理下でプログラムを実行: \texttt{run}}
+さて, GDB の管理下でプログラムを実行するために \textbf{run}~コマンドを
+実行する:
+\begin{consoleinput}
+(gdb) run
+Starting program: /home/onotakao/debug/target 
+heLlo
+
+Program received signal SIGSEGV, Segmentation fault.
+0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+6	    str[i] = toupper(str[i]);
+\end{consoleinput}
+やはり ``Segmentation fault'' で停止してしまった. しかし, いくつかの情
+報が追加されている. つまり,
+\begin{consoleinput}
+0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+\end{consoleinput}
+という行によって ``プログラムがどこで停止したか'' がわかる. 今の場合
+\begin{itemize}
+\item アドレス~\texttt{0x080483b9} で止まった\footnote{この値は知っても
+あまり役に立たないので無視してもいい.}
+\item これは関数~\lstinline|sub1| の中である
+\item ソースファイル~\Filename{target.c} の $6$~行目で
+\item 関数に対する引数は第~$1$~引数の \lstinline|str| が %
+\lstinline|0x0|, 第~$2$~引数の \lstinline|i| が \lstinline|1|
+\end{itemize}
+ということを意味する. その次の行はソースファイルの $6$~行目をそのまま
+表示している.
+
+なお, \texttt{run} を実行するときに
+\begin{consoleinput}
+(gdb) run arg1 arg2
+\end{consoleinput}
+のように引数を与えれば, デバッグしたいプログラムに引数を渡すことができ
+る.
+
+\subsection{値の表示: \texttt{print}}
+現在のスタックフレーム~(関数) にある変数の値は \textbf{print}~コマンド
+で表示できる:
+\begin{consoleinput}
+(gdb) print str
+$1 = 0x0
+(gdb) print i
+$2 = 1
+\end{consoleinput}
+これは, 変数~\lstinline|str| の値が \lstinline|0x0|, \lstinline|i| の
+値が \lstinline|1| であることを示している.
+
+なお, \texttt{print} で表示する値は変数だけでなく, 関数を呼び出さなけれ
+ば C で有効な式を使うことができる. つまり, 配列に対して添字付けをした
+り, メンバーアクセス演算子の \lstinline|.| や \lstinline|->| で構造体
+のメンバーを調べることもできる.
+
+\subsection{関数の実行履歴の表示: \texttt{bt}}
+ちょっと大きなプログラムでは, 複数の関数が呼び出されることになる. その
+ようなときに ``関数がどのように呼び出されてきたか'' を知るために
+\textbf{bt}~コマンドを使う:
+\begin{consoleinput}
+(gdb) bt
+#0  0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+#1  0x08048425 in main () at target.c:16
+\end{consoleinput}
+現在実行中の関数が最も上に表示され, それぞれの関数を呼び出した関数が順
+次表示される. 今の例だと現在実行している関数は \lstinline|sub1| で,
+\Filename{target.c} の $6$~行目にいること, この関数は \lstinline|main| %
+の中, \Filename{target.c} の $16$~行目で呼び出されていることがわかる.
+
+\subsection{スタックフレームの移動: \texttt{up}, \texttt{down}}
+C では, ``関数にローカルな変数'' をその関数以外で見ることができない. そ
+こで, 別の関数で定義された変数の値を調べるときには \textbf{up},
+\textbf{down} といったコマンドでスタックフレームを移動する:
+\begin{consoleinput}
+(gdb) up
+#1  0x08048425 in main () at target.c:16
+16	    sub1(0, 1);
+(gdb) down
+#0  0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+6	    str[i] = toupper(str[i]);
+\end{consoleinput}
+\texttt{up} で呼出元の関数に, \texttt{down} で呼出先の関数に移動するこ
+とができる.
+
+\subsection{GDB の終了: \texttt{quit}}
+GDB を終了するときには \textbf{quit}~コマンドを使う:
+\begin{consoleinput}
+(gdb) quit
+The program is running.  Exit anyway? (y or n) y
+>
+\end{consoleinput}
+実行中のプログラムが存在するときには ``本当に終了してよいか'' どうかを
+聞いてくる. \texttt{y} を入力するとデバッガは終了する.
+
+\section{終わりに}
+いずれにしても, デバッグ手法に王道は存在しない. \lstinline|printf|~デ
+バッグや GDB によるデバッグによっても見付からない (あるいは見付けにく
+い) バグというのはありえる. 最初に挙げた \Filename{target.c} でも %
+$12$~行目が
+\begin{lstlisting}[firstnumber=12]
+char *str = "hello";
+\end{lstlisting}
+となっていたら簡単ではない (\textbf{文字列リテラルを変更してはいけない}こ
+とを意識していないと難しい). また, 特にポインタまわりのバグで
+は ``\lstinline|printf| を入れると動作する'' とか ``GDB ではちゃんと動
+く'' など, デバッグが困難な場合もある.
+
+プログラム作成におけるデバッグのコストは (それそのものは何も生み出さな
+いにもかかわらず) 非常に大きなものとなっている. 従って, \textbf{バグが
+なるべく入らないように}, また\textbf{入ったとしてもバグが見付けやすいよ
+うに}プログラムを作成することが重要である.
+\end{document}
+
+%%% Local Variables: 
+%%% mode: japanese-latex
+%%% TeX-master: t
+%%% End: 

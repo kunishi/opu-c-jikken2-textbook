@@ -1,0 +1,157 @@
+%#!platex kadai2006_01
+
+%%%
+%%% 後半組は文字列操作, 分割コンパイルをやっていないので
+%%% それらの内容をここでフォローする
+%%%
+
+% \section{目的}
+
+% 構造体の利用を学ぶ上で、構造体を用いない場合と用いた場合で同一の動作を
+% するプログラムを作成し、その違いを理解することは重要である。
+% 以下の課題では、電話番号簿を作成することを念頭に構造体の利用の有無によっ
+% てプログラム上の違いを体験する。
+
+% また、ポインタ操作の復習として、文字列操作についての課題を行う。
+
+\section{課題: 文字列操作}
+\label{115524_10Oct06}
+
+\begin{exercise}
+ C言語には、文字列を操作するライブラリ関数として {\ttfamily strcpy},
+ {\ttfamily strcmp}, {\ttfamily strcat}などがある。これらの関数について、
+ 以下の項目をマニュアル等を用いて調べよ。
+ \begin{itemize}
+  \item 引数の数・型、返り値の型
+  \item 関数の動作の概要、引数や返り値の意味
+ \end{itemize}
+\end{exercise}
+
+\begin{exercise}
+ 課題\ref{115524_10Oct06}で調べた内容を基に、{\ttfamily strcpy},
+ {\ttfamily strcmp}, {\ttfamily strcat}と全く同じ振舞いをする関数を実装
+ し、動作を確認せよ。関数名はそれぞれ {\ttfamily my\_strcpy}, {\ttfamily
+ my\_strcmp}, {\ttfamily my\_strcat} とせよ。
+
+ ここでいう「振舞い」とは、関数の動作だけではなく、引数の数・型、返り値
+ の型、それらの意味なども含まれる。つまり、{\ttfamily strcpy}の代わりに
+ {\ttfamily my\_strcpy}を用いても全く同じ動作をしなければならない。
+
+ 動作の確認には、{\ttfamily my\_strcpy}, {\ttfamily my\_strcmp},
+ {\ttfamily my\_strcat}を使用して{\ttfamily main()}を実装し、その動作が
+ 予想通りになっているかどうか調べれば良い。
+\end{exercise}
+
+\section{課題: 住所録の作成}
+
+\subsection{仕様}
+\label{111039_10Oct06}
+
+作成する電話番号簿の仕様は次の通りとする。
+
+\begin{itemize}
+\item 個人データは、以下の 3 個の項目から構成されることとする。
+  \begin{enumerate}
+  \item 氏名（アルファベット）：\texttt{char[256]}（文字列）
+  \item 電話番号：\texttt{char[16]}（文字列）
+  \item 学籍番号：\texttt{int}
+  \end{enumerate}
+\item 最大 5 名分のデータを管理できること。
+\item 新規追加が可能であること。
+\item 指定されたデータの削除が可能であること。
+  削除されたデータ項目は次の仕様に基づいて「登録がない」状態とすること。
+\item 登録がないデータ項目は、氏名および電話番号についてはヌル文字列、
+  学籍番号については 0 が格納されていることとする。
+\item 上記の仕様を用いて、一度削除されたデータ項目は以降の新規追加処理
+  で再利用可能であること。
+\end{itemize}
+
+\subsection{課題}
+
+\subsubsection{構造体を用いない実装}
+
+\begin{exercise}
+\label{ex:structure2} \ref{111039_10Oct06}節で述べた個人データを管理する
+住所録を、名前、電話番号、学籍番号を表す3つの配列\texttt{name},
+\texttt{phone}, \texttt{number}を用いて実装せよ\footnote{\texttt{name},
+ \texttt{phone}, \texttt{number}それぞれの0番目の要素で0番目の個人データ
+ を表現するというような実装になる。住所録の表の各列(名前、電話番号、学籍
+ 番号)をそれぞれ1つの配列で実装するようなイメージ。}。
+\begin{enumerate}
+ \item (データの新規追加) 引数を順に名前、電話番号、学籍番号とするような
+       データ項目を住所録に追加する関数
+       \begin{quote}
+	\texttt{void add(char *, char *, int);}
+       \end{quote}
+ \item (データ項目の削除) 引数で指定されたデータ項目と合致する個人データ
+       を住所録から削除する関数
+       \begin{quote}
+	\texttt{void delByName(char *);}\\
+	\texttt{void delByPhone(char *);}\\
+	\texttt{void delByNumber(int);}
+       \end{quote}
+       例えば{\ttfamily delByName()}は、引数で指定された文字列を名前と
+       するような個人データを住所録から削除する。{\ttfamily
+       delByPhone()}, {\ttfamily delByNumber()}も同様である。
+ \item (データの検索) 引数で指定されたデータ項目を住所録から検索する関数
+       \begin{quote}
+	\texttt{void findByName(char *);}\\
+	\texttt{void findByPhone(char *);}\\
+	\texttt{void findByNumber(int);}
+       \end{quote}
+       例えば{\ttfamily findByName()}は、引数で指定された文字列を名前と
+       するようなデータ項目を住所録から検索する。{\ttfamily
+       findByPhone()}, {\ttfamily findByNumber()}も同様である。
+
+       これらの関数は、合致するすべての個人データを表示するものとする。
+ \item (データの表示) 住所録に登録されている個人データをすべて表示する関
+       数
+       \begin{quote}
+	\texttt{void printAll();}
+       \end{quote}
+       未使用の領域も出力すること。
+\end{enumerate}
+を作成せよ。
+
+\begin{itemize}
+ \item 引数の意味に充分注意すること。例年、引数の意味を誤解して実装を行
+       う学生が少なからず見受けられる。
+ \item 文字列の一致判定には \texttt{strcmp} を用いるとよい。
+ \item データを格納する配列 \texttt{name}、\texttt{phone}、
+       \texttt{number} はグローバル変数（大域変数）で確保してよい。
+\end{itemize}
+\end{exercise}
+
+\begin{exercise}
+ 課題\ref{ex:structure2}で作成した関数を用いて住所録データを操作する
+ {\ttfamily main()}関数を作成せよ。その実行結果も示せ。
+ \begin{itemize}
+  \item 今回の実験の主眼は{\ttfamily main()}ではなく、課題
+	\ref{ex:structure2}(および課題\ref{ex:structure3})である。したがってデータの入出力に凝る必要は
+	必ずしもない。例年、ユーザとの対話的入出力を実装してくる学生が多
+	い\footnote{出所は1つだと思われるが…}が、そこまでは要求しない。
+  \item ただし、課題\ref{ex:structure2}で実装した関数が正しく動作すること
+	を確認するように実装を行うこと。すなわち、最低限、{\ttfamily
+	main()}の中ですべての関数を使うようにしなければならない。
+ \end{itemize}
+\end{exercise}
+
+\subsubsection{構造体を用いた実装}
+
+\begin{exercise}
+\label{ex:structure1} \ref{111039_10Oct06}で述べた個人データを表す構造体
+ の宣言を書け。構造体のメンバー名は自由に決めてよい。
+\end{exercise}
+
+\begin{exercise}
+\label{ex:structure3}
+ 課題\ref{ex:structure2}で作成したものと同一（機能だけではなく引数の個数、
+ 型も同一）の関数群を構造体の配列を用いて実装せよ。ここで用いる構造体は、課題
+\ref{ex:structure1}で作成した構造体を用いること。なお、データを格納する構
+造体の配列はグローバル変数（大域変数）で確保してよい。
+\end{exercise}
+
+\begin{exercise}
+ 課題\ref{ex:structure3}で作成した関数を用いて住所録データを操作する
+ {\ttfamily main()}関数を作成せよ。その実行結果も示せ。
+\end{exercise}

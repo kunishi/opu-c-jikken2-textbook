@@ -1,0 +1,59 @@
+> cat target.c
+#include <stdio.h>
+#include <ctype.h>
+
+void sub1(char *str, int i)
+{
+    str[i] = toupper(str[i]);
+    printf("%s\n", str);
+}
+
+int main()
+{
+    char str[] = "hello";
+
+    sub1(str, 2);
+
+    sub1(0, 1);
+
+    return 0;
+}
+> gcc -o target target.c
+> ./target
+heLlo
+Segmentation fault
+> gcc -g -o target target.c
+> ./target
+heLlo
+Segmentation fault
+> gdb ./target
+GNU gdb 6.8-debian
+Copyright (C) 2008 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu"...
+(gdb) run
+Starting program: /home/onotakao/debug/target 
+heLlo
+
+Program received signal SIGSEGV, Segmentation fault.
+0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+6	    str[i] = toupper(str[i]);
+(gdb) print str
+$1 = 0x0
+(gdb) print i
+$2 = 1
+(gdb) bt
+#0  0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+#1  0x08048425 in main () at target.c:16
+(gdb) up
+#1  0x08048425 in main () at target.c:16
+16	    sub1(0, 1);
+(gdb) down
+#0  0x080483b9 in sub1 (str=0x0, i=1) at target.c:6
+6	    str[i] = toupper(str[i]);
+(gdb) quit
+The program is running.  Exit anyway? (y or n) y
+> exit

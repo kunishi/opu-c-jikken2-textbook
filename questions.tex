@@ -1,0 +1,445 @@
+\documentclass[a4j,11pt]{jsarticle}
+
+\usepackage{ascmac}
+\usepackage{graphicx}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  連結リストのセルを表す構造体を記述せよ.
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  二分木の節点を表す構造体を記述せよ.
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  下記に示す構造体で表される連結リストが次のとおり記憶されているとする.
+  このとき, 変数 \texttt{cell1} を用いて \texttt{cell3->data} の値を
+  10 に変更せよ.
+
+\begin{verbatim}
+   struct cell {
+       int data;
+       struct cell *next;
+   };
+
+   struct cell *cell1, *cell2, *cell3;
+
+   cell1->data = 2;      cell2->data = 7;      cell3->data = 3;
+   cell1->next = cell2;  cell2->next = cell3;  cell3->next = NULL;
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  下記に示す構造体で表される二分木が次のとおり記憶されているとする.
+  このとき, 変数 \texttt{node1} を用いて \texttt{node4->data} の値を
+  10 に変更せよ.
+
+\begin{verbatim}
+  struct node {
+       int data;
+       struct node *left;
+       struct node *right;
+   };
+
+   struct node *node1, *node2, *node3, *node4, *node5;
+
+   node1->data = 2;      node2->data = 7;      node3->data = 3;
+   node1->left = node2;  node2->left = node5;  node3->left = NULL;
+   node1->right = node3; node2->right = NULL;  node3->right = node4;
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  フィボナッチ数列を求める次の再帰関数の \texttt{*A*} を埋めよ.
+
+\begin{verbatim}
+  int fibonacci(int num)
+   {
+     int result;  /* calculation result */
+
+     if (num <= 2) {
+       result = 1;
+     } else {
+       *A*
+     }
+
+     return result;
+   }
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  ある正の整数値の階乗を求める次の再帰関数の \texttt{*A*} を埋めよ.
+
+\begin{verbatim}
+  int factorial(int num)
+   {
+     int result;  /* calculation result */
+
+     if (num == 1) {
+       result = 1;
+     } else {
+       *A*
+     }
+
+     return result;
+   }
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  スタックのトップセルが保持しているデータを取得する関数
+  \texttt{int topStack(struct cell *stack);} をリストの操作関数群を使っ
+  て記述せよ.
+  ただし, スタックの底はリストの先頭セルとする.
+
+  \vspace{5.0mm}
+
+  リストの操作関数群:
+
+  \small
+  \begin{tabular}{l}
+    \texttt{struct cell *makeNullList(void);}\\
+    \texttt{struct cell *nextCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *firstCell(struct cell *list);}\\
+    \texttt{struct cell *endCell(struct cell *list);}\\
+    \texttt{struct cell *previousCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *insertCell(int data, struct cell *targt, struct cell *list);}\\
+    \texttt{struct cell *deleteCell(struct cell *target, struct cell *list);}\\
+    \texttt{int retrieveCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *locate(int data, struct cell *list);}
+  \end{tabular}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  キューの先頭データを取得する関数 \texttt{int frontQueue(struct cell
+  *queue);} をリストの操作関数群を使って記述せよ.
+  ただし, キューの終端はリストの先頭セルとする.
+
+  \vspace{5.0mm}
+
+  リストの操作関数群:
+
+  \small
+  \begin{tabular}{l}
+    \texttt{struct cell *makeNullList(void);}\\
+    \texttt{struct cell *nextCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *firstCell(struct cell *list);}\\
+    \texttt{struct cell *endCell(struct cell *list);}\\
+    \texttt{struct cell *previousCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *insertCell(int data, struct cell *targt, struct cell *list);}\\
+    \texttt{struct cell *deleteCell(struct cell *target, struct cell *list);}\\
+    \texttt{int retrieveCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *locate(int data, struct cell *list);}
+  \end{tabular}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  リストを逆順に並べ替える関数 \texttt{struct cell *reverseList(struct
+   cell *list);} の \texttt{*A*} を埋めよ.
+
+  \vspace{5.0mm}
+
+  リストの操作関数群:
+
+  \small
+  \begin{tabular}{l}
+    \texttt{struct cell *makeNullList(void);}\\
+    \texttt{struct cell *nextCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *firstCell(struct cell *list);}\\
+    \texttt{struct cell *endCell(struct cell *list);}\\
+    \texttt{struct cell *previousCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *insertCell(int data, struct cell *targt, struct cell *list);}\\
+    \texttt{struct cell *deleteCell(struct cell *target, struct cell *list);}\\
+    \texttt{int retrieveCell(struct cell *target, struct cell *list);}\\
+    \texttt{struct cell *locate(int data, struct cell *list);}
+  \end{tabular}
+
+\begin{verbatim}
+   struct cell *reverseList(struct cell *list)
+   {
+     struct cell *rev;  /* reversed list */
+     int data;  /* cell data */
+
+     if (firstCell(list) != (struct cell*)NULL) {
+       /* retrieve and delete first cell */
+       data = retrieveCell(firstCell(list), list);
+       deleteCell(firstCell(list), list);
+
+       /* reverse list */
+       rev = reverseList(list);
+
+       /* insert retrieved data to tail */
+       *A*
+     } else {
+       rev = makeNullList();
+     }
+
+     return rev;
+   }
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+  次のプログラムを見て, 間違いがあればそれを修正せよ.
+
+\begin{verbatim}
+   struct cell {
+     int data;
+     struct cell *next;
+   };
+
+   void func()
+   {
+     struct cell *cell1, *cell2;
+
+     cell1->data = 10;
+     cell1->next = (struct cell*)NULL;
+
+     cell2 = cell1;
+
+     printf("cell2->data = %d\n", cell2->data);
+
+     free(cell1);
+   }
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+二分木を通りがけ順に表示する関数 \texttt{void inOrder(struct node
+  *tree);} の \texttt{*A*} および \texttt{*B*} を埋めよ。
+
+\begin{verbatim}
+void inOrder(struct node *tree)
+{
+  if (tree != (struct node*)NULL) {
+    if(tree->left != (struct node*)NULL) {
+      *A*
+    }
+
+    printf("%d, ", tree->data);
+
+    if(tree->right != (struct node*)NULL) {
+      *B*
+    }
+  }
+}
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+実行ファイル \texttt{test} を作成するためには、C のソースファイル
+\texttt{test.c} をコンパイルおよびリンクする必要があるとき、実行ファイ
+ル \texttt{test} を作成するための \texttt{Makefile} を記述せよ。
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+分割コンパイルを行うとき、ヘッダファイルを別に作成することがあるが、作
+成する関数のプロトタイプ宣言をヘッダファイル内に記述する意味を述べよ。
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+次のプログラムを実行した際、表示されるものは何か。その理由とともに述べ
+よ。
+
+\begin{verbatim}
+struct st {
+  int data;
+  struct st *next;
+};
+
+int main(void)
+{
+  struct st stA, stB, stC;
+
+  stA.data = 12;
+  stA.next = &stC;
+  stB.data = 35;
+  stB.next = &stA;
+  stC.data = 27;
+  stC.next = &stB;
+
+  printf("%d\n", (stB.next)->data);
+
+  return 0;
+}
+\end{verbatim}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+図で示される二分木が次の関数の引数として与えられたとき、表示されるもの
+は何か。その理由とともに述べよ。
+
+\begin{verbatim}
+struct node {
+  int data;
+  struct node *left;
+  struct node *right;
+};
+
+int func(struct node *tree)
+{
+  struct node *p;
+
+  if (tree->left != (struct node*)NULL) {
+    func(tree->left);
+  } else {
+    printf("%d\n", tree->data);
+  }
+}
+\end{verbatim}
+
+\includegraphics[height=60.0mm]{tree.eps}
+\end{screen}
+
+\newpage
+
+\begin{flushright}
+  情報通信工学実験IB第6週課題
+\end{flushright}
+
+\underline{学籍番号:\makebox[30.0mm]{}氏名:\makebox[50.0mm]{}}
+\vspace{5.0mm}
+
+\begin{screen}
+\end{screen}
+
+\end{document}
+
